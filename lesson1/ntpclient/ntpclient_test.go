@@ -1,15 +1,15 @@
-package main
+package ntpclient
 
 import (
-	"flag"
 	"math/rand"
-	"os"
 	"testing"
 	"time"
 )
 
 const (
-	badHost = "127.0.0.1"
+	badHost             = "127.0.0.1"
+	testGoodHostTimeout = 5
+	testGoodHostRetry   = 2
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 
 func TestGetTimeCorrectHost(t *testing.T) {
 	rand.Seed(time.Now().Unix())
-	_, err := GetTime(goodHosts[rand.Intn(len(goodHosts))], 10, 200, 2)
+	_, err := GetTime(goodHosts[rand.Intn(len(goodHosts))], 10, 200, testGoodHostRetry, testGoodHostTimeout)
 	if err != nil {
 		t.Errorf("Received incorrect response from correct address: %s", err)
 	}
@@ -26,13 +26,8 @@ func TestGetTimeCorrectHost(t *testing.T) {
 
 // TestMain test test
 func TestGetTimeInvalidHost(t *testing.T) {
-	_, err := GetTime(badHost, 10, 100, 2)
+	_, err := GetTime(badHost, 10, 100, 1, 0)
 	if err == nil {
 		t.Errorf("Received correct response from invalid address")
 	}
-}
-
-func TestMain(m *testing.M) {
-	flag.Parse()
-	os.Exit(m.Run())
 }
