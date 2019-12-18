@@ -22,23 +22,33 @@ var successTests = []struct {
 		err:    false,
 	},
 	{
+		input:  "b11",
+		output: "bbbbbbbbbbb",
+		err:    false,
+	},
+	{
 		input:  "45",
 		output: "",
 		err:    true,
 	},
 	{
-		input:  "qwe\\4\\5",
+		input:  `qwe\4\5`,
 		output: "qwe45",
 		err:    false,
 	},
 	{
-		input:  "qwe\\45",
+		input:  `\\7`,
+		output: `\\\\\\\`,
+		err:    false,
+	},
+	{
+		input:  `qwe\45`,
 		output: "qwe44444",
 		err:    false,
 	},
 	{
-		input:  "qwe\\\\5",
-		output: "qwe\\\\\\\\\\",
+		input:  `qwe\\5`,
+		output: `qwe\\\\\`,
 		err:    false,
 	},
 }
