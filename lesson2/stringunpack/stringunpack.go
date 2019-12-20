@@ -87,7 +87,6 @@ func Unpack(input string) (string, error) {
 	builder.Reset()
 	prevSymbolType = symTypeUndefined
 	repeatSymCount = 0
-	// adding fake symbol at the end
 	fmt.Printf("Processing string: %s \n\n", input)
 	for currentPosition, currentSymbol = range input {
 		if err := processSymbol(); err != nil {
