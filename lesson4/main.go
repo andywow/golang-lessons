@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"os"
+	"log"
 	"strings"
 
 	"github.com/andywow/golang-lessons/lesson4/dictparser"
@@ -18,28 +18,25 @@ var (
 func main() {
 	flag.Parse()
 	if *fileName == "" && *data == "" {
-		fmt.Fprintf(os.Stderr, "You need specify filename or data parameter")
-		os.Exit(1)
+		log.Fatalf("You need specify filename or data parameter")
 	}
 	if *fileName != "" && *data != "" {
-		fmt.Fprintf(os.Stderr, "You need specify only one of filename and data parameters")
-		os.Exit(1)
+		log.Fatalf("You need specify only one of filename and data parameters")
 	}
-	result := []string{}
+	var result []string
 	if *data != "" {
-		fmt.Println("Parsing data from input")
+		log.Println("Parsing data from input")
 		result = dictparser.Top10(*data)
 	}
 	if *fileName != "" {
 		content, err := ioutil.ReadFile(*fileName)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err)
-			os.Exit(1)
+			log.Fatalf("%s\n", err)
 		}
 		text := string(content)
-		fmt.Println("Parsing data from file")
+		log.Println("Parsing data from file")
 		result = dictparser.Top10(text)
 	}
-	fmt.Println("Top10 words:")
+	log.Println("Top10 words:")
 	fmt.Println(strings.Join(result, "\n"))
 }

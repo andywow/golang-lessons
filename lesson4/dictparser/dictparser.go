@@ -11,18 +11,24 @@ type pair struct {
 	Value int
 }
 
+var regex *regexp.Regexp
+
+func init() {
+	regex = regexp.MustCompile("[^a-zA-Z0-9А-Яа-я]+")
+}
+
 // Top10 - return top 10 words from dictionary
 func Top10(input string) []string {
 	dictionary := map[string]int{}
 	// calculate words and their count
-	words := regexp.MustCompile("[^a-zA-Z0-9А-Яа-я]+").Split(input, -1)
+	words := regex.Split(input, -1)
 	for _, word := range words {
 		if word != "" {
 			dictionary[strings.ToLower(word)]++
 		}
 	}
 	// sorting map
-	i := 0
+	var i int
 	pairList := make([]pair, len(dictionary))
 	for key, value := range dictionary {
 		pairList[i] = pair{key, value}
