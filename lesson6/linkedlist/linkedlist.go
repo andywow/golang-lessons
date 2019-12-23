@@ -1,7 +1,5 @@
 package linkedlist
 
-import "fmt"
-
 // Item of List
 type Item struct {
 	value      interface{}
@@ -53,8 +51,8 @@ func (list *List) Last() *Item {
 	return list.last
 }
 
-// PushFront insert element after last element
-func (list *List) PushFront(v interface{}) {
+// PushBack insert element after last element
+func (list *List) PushBack(v interface{}) {
 	item := Item{value: v}
 	if list.Len() == 0 {
 		list.first = &item
@@ -67,8 +65,8 @@ func (list *List) PushFront(v interface{}) {
 	list.len++
 }
 
-// PushBack insert element before first element
-func (list *List) PushBack(v interface{}) {
+// PushFront insert element before first element
+func (list *List) PushFront(v interface{}) {
 	item := Item{value: v}
 	if list.Len() == 0 {
 		list.first = &item
@@ -83,31 +81,26 @@ func (list *List) PushBack(v interface{}) {
 
 // Remove element from list
 func (list *List) Remove(item Item) {
-	fmt.Println("Removing: ", item)
-	// empty list
-	if list.len == 0 {
+	switch {
+	case list.len == 0:
 		return
-	} else if list.len == 1 && *list.first == item {
-		fmt.Println("Removing last element")
+	case list.len == 1 && *list.first == item:
 		list.first = nil
 		list.last = nil
 		list.len--
-	} else if item.prev == nil && *list.first == item {
-		fmt.Println("Removing first element from begin")
+	case item.prev == nil && *list.first == item:
 		list.first = list.first.next
 		if list.first != nil {
 			list.first.prev = nil
 		}
 		list.len--
-	} else if item.next == nil && *list.last == item {
-		fmt.Println("Removing first element from end")
+	case item.next == nil && *list.last == item:
 		list.last = list.last.prev
 		if list.last != nil {
 			list.last.next = nil
 		}
 		list.len--
-	} else if item.prev != nil && item.next != nil && *item.prev.next == item && *item.next.prev == item {
-		fmt.Println("Removing mid element")
+	case item.prev != nil && item.next != nil && *item.prev.next == item && *item.next.prev == item:
 		item.prev.next = item.next
 		item.next.prev = item.prev
 		list.len--

@@ -34,7 +34,8 @@ func TestEmptyList(t *testing.T) {
 	assert.Equal(t, list.Len(), 0)
 }
 
-func testPushFirstElement(t *testing.T, list *List, v interface{}) {
+func helperPushFirstElement(t *testing.T, list *List, v interface{}) {
+	t.Helper()
 	assert.NotNil(t, list.First())
 	assert.NotNil(t, list.Last())
 	assert.Equal(t, list.First(), list.Last())
@@ -44,32 +45,32 @@ func testPushFirstElement(t *testing.T, list *List, v interface{}) {
 	assert.Equal(t, list.Len(), 1)
 }
 
-func TestPushFront(t *testing.T) {
+func TestPushBack(t *testing.T) {
 	list := List{}
-	list.PushFront(1)
-	testPushFirstElement(t, &list, 1)
-	list.PushFront(2)
+	list.PushBack(1)
+	helperPushFirstElement(t, &list, 1)
+	list.PushBack(2)
 	assert.NotNil(t, list.Last())
 	assert.Equal(t, list.Last().Value(), 2)
 	assert.Equal(t, list.Last().Prev(), list.First())
 	assert.Equal(t, list.Last().Prev().Next(), list.Last())
 	assert.Equal(t, list.Len(), 2)
-	list.PushFront(nil)
+	list.PushBack(nil)
 	assert.Equal(t, list.Last().Value(), nil)
 	assert.Equal(t, list.Len(), 3)
 }
 
-func TestPushBack(t *testing.T) {
+func TestPushFront(t *testing.T) {
 	list := List{}
-	list.PushBack(1)
-	testPushFirstElement(t, &list, 1)
-	list.PushBack(2)
+	list.PushFront(1)
+	helperPushFirstElement(t, &list, 1)
+	list.PushFront(2)
 	assert.NotNil(t, list.First())
 	assert.Equal(t, list.First().Value(), 2)
 	assert.Equal(t, list.First().Next(), list.Last())
 	assert.Equal(t, list.First().Next().Prev(), list.First())
 	assert.Equal(t, list.Len(), 2)
-	list.PushBack(nil)
+	list.PushFront(nil)
 	assert.Equal(t, list.First().Value(), nil)
 	assert.Equal(t, list.Len(), 3)
 }
@@ -83,7 +84,7 @@ func TestRemove(t *testing.T) {
 	assert.Nil(t, list.Last())
 	assert.Equal(t, list.Len(), 0)
 	// fill test data
-	list.PushBack(2)
+	list.PushFront(2)
 	// remove unexisting element from one-item list(
 	list.Remove(fakeItem)
 	assert.Equal(t, list.First(), list.Last())
@@ -97,7 +98,7 @@ func TestRemove(t *testing.T) {
 	// fill test data
 	var middleItem *Item
 	for i := 0; i < 10; i++ {
-		list.PushFront(i)
+		list.PushBack(i)
 		if i == 5 {
 			middleItem = list.Last()
 		}
