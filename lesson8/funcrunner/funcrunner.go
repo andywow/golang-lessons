@@ -4,54 +4,65 @@ import (
 	"fmt"
 )
 
-// waiting for all goroutines finish
-func waitForCompleteTasks(taskCount int, taskChannel chan int) {
-	for i := 0; i < taskCount; i++ {
-		if _, ok := <-taskChannel; !ok {
-			return
-		}
-	}
-	close(taskChannel)
-}
-
 // Run concurrent tasks
 func Run(tasks []func() error, N int, M int) error {
-	// running task pool
-	currentTaskChannel := make(chan int, N)
-	// all task pool (running + finished)
-	allTaskChannel := make(chan int, len(tasks))
+	// start task pool
+	taskChannel := make(chan int, len(tasks))
 	// error pool
 	errorChannel := make(chan error, len(tasks))
-	var currentTask int
 
-	defer func() {
-		waitForCompleteTasks(currentTask, allTaskChannel)
-		close(currentTaskChannel)
-		close(errorChannel)
-	}()
-
-	for currentTask < len(tasks) {
-
-		if len(errorChannel) >= M {
-			return fmt.Errorf("Max number of errors reached")
-		}
-
-		currentTaskChannel <- 1
-
-		go func(currentTask int) {
-			allTaskChannel <- 1
-			err := tasks[currentTask]()
-			if err != nil {
-				errorChannel <- err
-			}
-			// decrease for clear N-task pool
-			<-currentTaskChannel
-		}(currentTask)
-
-		currentTask++
+	// routine count
+	routineNum := N
+	if len(tasks) < N {
+		routineNum = len(tasks)
 	}
 
-	waitForCompleteTasks(currentTask, allTaskChannel)
+	// quit task pool
+	quitChannel := make(chan int, routineNum)
+	for i := 0; i < routineNum; i++ {
+		quitChannel <- i
+	}
+
+	defer func() {
+		close(errorChannel)
+		close(quitChannel)
+	}()
+
+	// feel pool with tasks id-s
+	for i := 0; i < len(tasks); i++ {
+		taskChannel <- i
+	}
+	close(taskChannel)
+
+	for i := 0; i < routineNum; i++ {
+
+		go func() {
+
+			defer func() {
+				<-quitChannel
+			}()
+
+			for {
+				if len(errorChannel) >= M {
+					return
+				}
+				taskID, ok := <-taskChannel
+				if !ok {
+					return
+				}
+				err := tasks[taskID]()
+				if err != nil {
+					errorChannel <- err
+				}
+			}
+
+		}()
+
+	}
+
+	for len(quitChannel) > 0 {
+	}
+
 	if len(errorChannel) >= M {
 		return fmt.Errorf("Max number of errors reached")
 	}
