@@ -18,10 +18,7 @@ func Run(tasks []func() error, N int, M int) error {
 	}
 
 	// quit task pool
-	quitChannel := make(chan int, routineNum)
-	for i := 0; i < routineNum; i++ {
-		quitChannel <- i
-	}
+	quitChannel := make(chan struct{}, routineNum)
 
 	defer func() {
 		close(errorChannel)
@@ -39,7 +36,7 @@ func Run(tasks []func() error, N int, M int) error {
 		go func() {
 
 			defer func() {
-				<-quitChannel
+				quitChannel <- struct{}{}
 			}()
 
 			for {
@@ -60,7 +57,9 @@ func Run(tasks []func() error, N int, M int) error {
 
 	}
 
-	for len(quitChannel) > 0 {
+	// wait for goroutine finish
+	for i := 0; i < routineNum; i++ {
+		<-quitChannel
 	}
 
 	if len(errorChannel) >= M {
