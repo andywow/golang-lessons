@@ -6,18 +6,12 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"regexp"
+	"strconv"
 	"strings"
+	"syscall"
 )
 
 const envFileMaxSize = 1024 * 1024
-
-var envFileNameRegex *regexp.Regexp
-
-func init() {
-	// regular expression for match env file name
-	envFileNameRegex = regexp.MustCompile(`^[^0-9]{1}[^=]*$`)
-}
 
 // ReadDir scan catalog and return env list
 func ReadDir(dir string) (map[string]string, error) {
@@ -43,8 +37,14 @@ func ReadDir(dir string) (map[string]string, error) {
 				file.Name(), envFileMaxSize)
 		}
 
-		if !envFileNameRegex.MatchString(file.Name()) {
-			return nil, fmt.Errorf("invalid file name: %s", file.Name())
+		if strings.Contains(file.Name(), "=") {
+			return nil, fmt.Errorf("invalid file name (contains '='): %s", file.Name())
+		}
+
+		for i := 0; i < 10; i++ {
+			if strings.HasPrefix(file.Name(), strconv.Itoa(i)) {
+				return nil, fmt.Errorf("invalid file name (contains '%d'): %s", i, file.Name())
+			}
 		}
 
 		fileContent, err := ioutil.ReadFile(path.Join(dir, file.Name()))
@@ -70,21 +70,14 @@ func RunCmd(cmd []string, env map[string]string) int {
 	command := exec.Command(cmd[0], cmdArgs...)
 
 	// make env list
-	command.Env = os.Environ()
 	for envName, envValue := range env {
 		if envValue == "" {
-			// removing environment variable
-			for index, value := range command.Env {
-				if strings.HasPrefix(value, envName+"=") {
-					command.Env = append(command.Env[:index], command.Env[index+1:]...)
-					break
-				}
-			}
+			os.Unsetenv(envName)
 		} else {
-			command.Env = append(command.Env,
-				fmt.Sprintf("%s=%s", envName, envValue))
+			os.Setenv(envName, envValue)
 		}
 	}
+	command.Env = os.Environ()
 
 	// redirect streams
 	command.Stdin = os.Stdin
@@ -94,9 +87,12 @@ func RunCmd(cmd []string, env map[string]string) int {
 	// run command
 	if err := command.Run(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return exitError.ExitCode()
+			if status, ok := exitError.Sys().(syscall.WaitStatus); ok {
+				return status.ExitStatus()
+			}
+			return -1
 		}
-		return -1
+		return -2
 	}
 
 	return 0
