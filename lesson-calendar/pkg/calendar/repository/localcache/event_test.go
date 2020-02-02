@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/model"
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar"
 	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,14 +15,14 @@ func TestCreateEvent(t *testing.T) {
 
 	s := NewEventLocalStorage()
 
-	event := model.Event{
+	event := calendar.Event{
 		Time: time.Now(),
 	}
 
 	err := s.CreateEvent(context.Background(), &event)
 	require.NoError(t, err)
 
-	eventSameTime := model.Event{
+	eventSameTime := calendar.Event{
 		Time: time.Now(),
 	}
 
@@ -38,7 +38,7 @@ func TestDeleteEvent(t *testing.T) {
 	s := NewEventLocalStorage()
 
 	currentTime := time.Now()
-	event := model.Event{
+	event := calendar.Event{
 		Time: currentTime,
 	}
 
@@ -61,10 +61,10 @@ func TestGetEvents(t *testing.T) {
 
 	s := NewEventLocalStorage()
 
-	event := model.Event{
+	event := calendar.Event{
 		Time: time.Now(),
 	}
-	event2 := model.Event{
+	event2 := calendar.Event{
 		Time: time.Now().Add(time.Hour * time.Duration(48)),
 	}
 
@@ -85,7 +85,7 @@ func TestUpdateEvent(t *testing.T) {
 
 	s := NewEventLocalStorage()
 
-	event := model.Event{
+	event := calendar.Event{
 		Time: time.Now(),
 	}
 

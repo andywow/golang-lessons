@@ -2,30 +2,28 @@ package localcache
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/model"
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar"
 	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/repository"
 )
 
 // EventLocalStorage local memory storage
 type EventLocalStorage struct {
-	events    map[string]*model.Event
-	mutex     *sync.Mutex
-	currentId int
+	events    map[string]*calendar.Event
+	mutex     sync.Mutex
+	currentID int
 }
 
 // NewEventLocalStorage constructor
 func NewEventLocalStorage() *EventLocalStorage {
 	return &EventLocalStorage{
-		events: make(map[string]*model.Event),
-		mutex:  new(sync.Mutex),
+		events: make(map[string]*calendar.Event),
 	}
 }
 
 // CreateEvent create event
-func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *model.Event) error {
+func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *calendar.Event) error {
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -34,9 +32,9 @@ func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *model.Event)
 		return repository.ErrDateBusy
 	}
 
-	event.ID = string(s.currentId + 1)
+	event.ID = string(s.currentID + 1)
 	// add new structure or user can modify event in storage explicity, not through interface
-	s.events[event.ID] = &model.Event{
+	s.events[event.ID] = &calendar.Event{
 		ID:   event.ID,
 		Time: event.Time,
 	}
@@ -45,14 +43,14 @@ func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *model.Event)
 }
 
 // GetEvents get events
-func (s *EventLocalStorage) GetEvents(ctx context.Context) []*model.Event {
-	events := make([]*model.Event, len(s.events))
+func (s *EventLocalStorage) GetEvents(ctx context.Context) []calendar.Event {
+	events := make([]calendar.Event, len(s.events))
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	for _, event := range s.events {
-		events = append(events, event)
+		events = append(events, *event)
 	}
 
 	return events
@@ -73,13 +71,12 @@ func (s *EventLocalStorage) DeleteEvent(ctx context.Context, id string) error {
 }
 
 // UpdateEvent update event
-func (s *EventLocalStorage) UpdateEvent(ctx context.Context, event *model.Event) error {
+func (s *EventLocalStorage) UpdateEvent(ctx context.Context, event *calendar.Event) error {
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	_, ok := s.events[event.ID]
-	if !ok {
+	if _, ok := s.events[event.ID]; !ok {
 		return repository.ErrEventNotFound
 	}
 
@@ -92,13 +89,11 @@ func (s *EventLocalStorage) UpdateEvent(ctx context.Context, event *model.Event)
 	return nil
 }
 
-func (s *EventLocalStorage) checkIfEventBusy(event *model.Event) bool {
+func (s *EventLocalStorage) checkIfEventBusy(event *calendar.Event) bool {
 	for _, storageEvent := range s.events {
 		if event.Time.Year() == storageEvent.Time.Year() &&
 			event.Time.Month() == storageEvent.Time.Month() &&
 			event.Time.Day() == storageEvent.Time.Day() {
-			fmt.Println("ev: ", event)
-			fmt.Println("sev: ", storageEvent)
 			return true
 		}
 	}
