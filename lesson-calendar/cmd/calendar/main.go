@@ -1,35 +1,69 @@
 package main
 
 import (
-	"log"
+	"flag"
+	"fmt"
 	"os"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/factory"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 
-	"github.com/kelseyhightower/envconfig"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/repository/localcache"
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/httpserver"
+
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
-type config struct {
-	StorageType string `default:"memory" split_words:"true"`
+var cfg config.Config
+
+func init() {
+	flag.String("configfile", "config.yaml", "config file path")
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
+
+	// default values
+	cfg = config.Config{
+		HTTPListen:  "127.0.0.1:8080",
+		LogLevel:    "info",
+		LogStdout:   true,
+		StorageType: "Memory",
+	}
 }
 
 func main() {
 
-	var cfg config
+	viper.SetConfigFile(viper.GetString("configfile"))
+	viper.SetConfigType("yaml")
 
-	err := envconfig.Process("calendar", &cfg)
+	err := viper.ReadInConfig()
 	if err != nil {
-		envconfig.Usage("calendar", cfg)
+		fmt.Printf("could not read config: %s\n", err)
 		os.Exit(1)
 	}
 
-	//TODO process repository later
-	_, err = factory.GetRepository(cfg.StorageType)
+	err = viper.Unmarshal(&cfg)
 	if err != nil {
-		//TODO replace with zap
-		log.Fatalf(err.Error())
+		fmt.Printf("could not read config: %s\n", err)
 		os.Exit(1)
 	}
 
-	log.Println("Finished")
+	logger, err := logconfig.GetLoggerForConfig(&cfg)
+	if err != nil {
+		fmt.Printf("could not configure logger: %s\n", err)
+		os.Exit(1)
+	}
+	defer logger.Sync()
+
+	sugar := logger.Sugar()
+
+	// cause it was in task
+	localcache.NewEventLocalStorage()
+	sugar.Info("Storage initialized")
+
+	sugar.Infof("Starting server on %s", cfg.HTTPListen)
+
+	httpserver.StartServer(cfg.HTTPListen, httpserver.WithLogger(logger))
+
 }
