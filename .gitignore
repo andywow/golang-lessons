@@ -12,3 +12,5 @@
 *.out
 
 lesson10/**/*.txt
+
+*.log
