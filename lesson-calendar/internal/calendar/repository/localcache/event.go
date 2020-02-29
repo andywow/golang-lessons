@@ -2,6 +2,7 @@ package localcache
 
 import (
 	"context"
+	"strconv"
 	"sync"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar"
@@ -10,9 +11,9 @@ import (
 
 // EventLocalStorage local memory storage
 type EventLocalStorage struct {
-	events    map[string]*calendar.Event
-	mutex     sync.Mutex
-	currentID int
+	events      map[string]*calendar.Event
+	mutex       sync.Mutex
+	currentUUID int
 }
 
 // NewEventLocalStorage constructor
@@ -25,6 +26,10 @@ func NewEventLocalStorage() *EventLocalStorage {
 // CreateEvent create event
 func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *calendar.Event) error {
 
+	if err := event.CheckEventData(); err != nil {
+		return err
+	}
+
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -32,11 +37,17 @@ func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *calendar.Eve
 		return repository.ErrDateBusy
 	}
 
-	event.ID = string(s.currentID + 1)
+	s.currentUUID++
+	event.UUID = strconv.Itoa(s.currentUUID)
+
 	// add new structure or user can modify event in storage explicity, not through interface
-	s.events[event.ID] = &calendar.Event{
-		ID:   event.ID,
-		Time: event.Time,
+	s.events[event.UUID] = &calendar.Event{
+		UUID:        event.UUID,
+		StartTime:   event.StartTime,
+		EndTime:     event.EndTime,
+		Header:      event.Header,
+		Description: event.Description,
+		User:        event.User,
 	}
 
 	return nil
@@ -49,21 +60,23 @@ func (s *EventLocalStorage) GetEvents(ctx context.Context) []calendar.Event {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
+	index := 0
 	for _, event := range s.events {
-		events = append(events, *event)
+		events[index] = *event
+		index++
 	}
 
 	return events
 }
 
 // DeleteEvent delete event
-func (s *EventLocalStorage) DeleteEvent(ctx context.Context, id string) error {
+func (s *EventLocalStorage) DeleteEvent(ctx context.Context, uuid string) error {
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if _, ok := s.events[id]; ok {
-		delete(s.events, id)
+	if _, ok := s.events[uuid]; ok {
+		delete(s.events, uuid)
 		return nil
 	}
 
@@ -73,10 +86,14 @@ func (s *EventLocalStorage) DeleteEvent(ctx context.Context, id string) error {
 // UpdateEvent update event
 func (s *EventLocalStorage) UpdateEvent(ctx context.Context, event *calendar.Event) error {
 
+	if err := event.CheckEventData(); err != nil {
+		return err
+	}
+
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if _, ok := s.events[event.ID]; !ok {
+	if _, ok := s.events[event.UUID]; !ok {
 		return repository.ErrEventNotFound
 	}
 
@@ -84,16 +101,20 @@ func (s *EventLocalStorage) UpdateEvent(ctx context.Context, event *calendar.Eve
 		return repository.ErrDateBusy
 	}
 
-	s.events[event.ID].Time = event.Time
+	s.events[event.UUID].StartTime = event.StartTime
+	s.events[event.UUID].EndTime = event.EndTime
+	s.events[event.UUID].Header = event.Header
+	s.events[event.UUID].Description = event.Description
+	s.events[event.UUID].User = event.User
 
 	return nil
 }
 
 func (s *EventLocalStorage) checkIfEventBusy(event *calendar.Event) bool {
 	for _, storageEvent := range s.events {
-		if event.Time.Year() == storageEvent.Time.Year() &&
-			event.Time.Month() == storageEvent.Time.Month() &&
-			event.Time.Day() == storageEvent.Time.Day() {
+		if event.StartTime.Equal(storageEvent.StartTime) || event.EndTime.Equal(storageEvent.EndTime) ||
+			(event.StartTime.After(storageEvent.StartTime) && event.StartTime.Before(storageEvent.EndTime)) ||
+			(event.EndTime.After(storageEvent.StartTime) && event.EndTime.Before(storageEvent.EndTime)) {
 			return true
 		}
 	}
