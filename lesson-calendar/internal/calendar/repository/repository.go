@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar"
 )
 
 // EventRepository work with data store

@@ -8,8 +8,8 @@ import (
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/repository/localcache"
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/httpserver"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/localcache"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/httpserver"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"

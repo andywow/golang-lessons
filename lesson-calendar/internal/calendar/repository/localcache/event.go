@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar"
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/repository"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
 )
 
 // EventLocalStorage local memory storage

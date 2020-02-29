@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar"
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/calendar/repository"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
