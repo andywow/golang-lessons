@@ -6,11 +6,9 @@ import (
 	"os"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
-
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/localcache"
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/httpserver"
-
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/grpcserver"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -58,12 +56,12 @@ func main() {
 
 	sugar := logger.Sugar()
 
-	// cause it was in task
-	localcache.NewEventLocalStorage()
-	sugar.Info("Storage initialized")
+	repository := localcache.NewEventLocalStorage()
+	logger.Info("Storage initialized")
 
-	sugar.Infof("Starting server on %s", cfg.HTTPListen)
+	sugar.Infof("Starting server on %s", cfg.GRPCListen)
 
-	httpserver.StartServer(cfg.HTTPListen, httpserver.WithLogger(logger))
+	grpcserver.StartServer(cfg.GRPCListen,
+		grpcserver.WithLogger(logger), grpcserver.WithRepository(&repository))
 
 }

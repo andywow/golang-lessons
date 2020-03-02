@@ -2,22 +2,23 @@ package calendar
 
 import (
 	"testing"
-	"time"
 
+	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCheckEventData(t *testing.T) {
-	event := Event{}
-	err := event.CheckEventData()
+	event := &Event{}
+	err := CheckEventData(event)
 	require.Error(t, err)
-	event = Event{
-		StartTime:   time.Now(),
-		EndTime:     time.Now().Add(time.Hour),
-		Header:      "Test event",
-		Description: "Test event description",
-		User:        "Bob",
+
+	event = &Event{
+		StartTime:   ptypes.TimestampNow(),
+		Duration:    60 * 60,
+		Header:      "test",
+		Description: "test",
+		User:        "test",
 	}
-	err = event.CheckEventData()
+	err = CheckEventData(event)
 	require.NoError(t, err)
 }

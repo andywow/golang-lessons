@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "event.proto";
+
+package calendar;
+
+option go_package = "github.com/andywow/golang-lessons/lesson-calendar/protobuf/internal/grpcserver";
+
+// delete event response code
+message EventDeleteStatus {
+  bool deleted = 1;
+}
+
+// event date
+message EventDate {
+  google.protobuf.Timestamp date = 1;
+}
+
+// api server
+service ApiServer {
+  // CreateEvent create event
+  rpc CreateEvent(calendar.Event) returns (calendar.Event);
+  // UpdateEvent update event 
+  rpc UpdateEvent(calendar.Event) returns (calendar.Event);
+  // DeteleEvent delete event
+  rpc DeleteEvent(calendar.Event) returns (EventDeleteStatus);
+  // GetEventsForDate get events for date
+  rpc GetEventsForDate(EventDate) returns (calendar.EventList);
+  // GetEventsForWeek get events for weak
+  rpc GetEventsForWeek(EventDate) returns (calendar.EventList);
+  // GetEventsForMonth get events for month
+  rpc GetEventsForMonth(EventDate) returns (calendar.EventList);
+}

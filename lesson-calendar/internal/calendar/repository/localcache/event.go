@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
@@ -17,7 +18,7 @@ type EventLocalStorage struct {
 }
 
 // NewEventLocalStorage constructor
-func NewEventLocalStorage() *EventLocalStorage {
+func NewEventLocalStorage() repository.EventRepository {
 	return &EventLocalStorage{
 		events: make(map[string]*calendar.Event),
 	}
@@ -26,7 +27,7 @@ func NewEventLocalStorage() *EventLocalStorage {
 // CreateEvent create event
 func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *calendar.Event) error {
 
-	if err := event.CheckEventData(); err != nil {
+	if err := calendar.CheckEventData(event); err != nil {
 		return err
 	}
 
@@ -38,13 +39,13 @@ func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *calendar.Eve
 	}
 
 	s.currentUUID++
-	event.UUID = strconv.Itoa(s.currentUUID)
+	event.Uuid = strconv.Itoa(s.currentUUID)
 
 	// add new structure or user can modify event in storage explicity, not through interface
-	s.events[event.UUID] = &calendar.Event{
-		UUID:        event.UUID,
+	s.events[event.Uuid] = &calendar.Event{
+		Uuid:        event.Uuid,
 		StartTime:   event.StartTime,
-		EndTime:     event.EndTime,
+		Duration:    event.Duration,
 		Header:      event.Header,
 		Description: event.Description,
 		User:        event.User,
@@ -53,20 +54,25 @@ func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *calendar.Eve
 	return nil
 }
 
-// GetEvents get events
-func (s *EventLocalStorage) GetEvents(ctx context.Context) []calendar.Event {
-	events := make([]calendar.Event, len(s.events))
+// GetEventsForDate get events for 1 day
+func (s *EventLocalStorage) GetEventsForDate(ctx context.Context, date time.Time) ([]*calendar.Event, error) {
+	startTime := date.Truncate(24 * time.Hour)
+	endTime := date.Truncate(24 * time.Hour).Add(24 * time.Hour)
+	return s.getEvents(startTime, endTime), nil
+}
 
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+// GetEventsForWeek get events for week
+func (s *EventLocalStorage) GetEventsForWeek(ctx context.Context, date time.Time) ([]*calendar.Event, error) {
+	startTime := date.Truncate(24 * time.Hour)
+	endTime := date.Truncate(24 * time.Hour).Add(24 * 7 * time.Hour)
+	return s.getEvents(startTime, endTime), nil
+}
 
-	index := 0
-	for _, event := range s.events {
-		events[index] = *event
-		index++
-	}
-
-	return events
+// GetEventsForMonth get events for month
+func (s *EventLocalStorage) GetEventsForMonth(ctx context.Context, date time.Time) ([]*calendar.Event, error) {
+	startTime := date.Truncate(24 * time.Hour)
+	endTime := date.Truncate(24*time.Hour).AddDate(0, 1, 0)
+	return s.getEvents(startTime, endTime), nil
 }
 
 // DeleteEvent delete event
@@ -86,14 +92,14 @@ func (s *EventLocalStorage) DeleteEvent(ctx context.Context, uuid string) error 
 // UpdateEvent update event
 func (s *EventLocalStorage) UpdateEvent(ctx context.Context, event *calendar.Event) error {
 
-	if err := event.CheckEventData(); err != nil {
+	if err := calendar.CheckEventData(event); err != nil {
 		return err
 	}
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if _, ok := s.events[event.UUID]; !ok {
+	if _, ok := s.events[event.Uuid]; !ok {
 		return repository.ErrEventNotFound
 	}
 
@@ -101,22 +107,44 @@ func (s *EventLocalStorage) UpdateEvent(ctx context.Context, event *calendar.Eve
 		return repository.ErrDateBusy
 	}
 
-	s.events[event.UUID].StartTime = event.StartTime
-	s.events[event.UUID].EndTime = event.EndTime
-	s.events[event.UUID].Header = event.Header
-	s.events[event.UUID].Description = event.Description
-	s.events[event.UUID].User = event.User
+	s.events[event.Uuid].StartTime = event.StartTime
+	s.events[event.Uuid].Duration = event.Duration
+	s.events[event.Uuid].Header = event.Header
+	s.events[event.Uuid].Description = event.Description
+	s.events[event.Uuid].User = event.User
 
 	return nil
 }
 
 func (s *EventLocalStorage) checkIfEventBusy(event *calendar.Event) bool {
 	for _, storageEvent := range s.events {
-		if event.StartTime.Equal(storageEvent.StartTime) || event.EndTime.Equal(storageEvent.EndTime) ||
-			(event.StartTime.After(storageEvent.StartTime) && event.StartTime.Before(storageEvent.EndTime)) ||
-			(event.EndTime.After(storageEvent.StartTime) && event.EndTime.Before(storageEvent.EndTime)) {
+		if event.Uuid != storageEvent.Uuid &&
+			((event.StartTime.GetSeconds() >= storageEvent.StartTime.GetSeconds() &&
+				event.StartTime.GetSeconds() <= storageEvent.StartTime.GetSeconds()+storageEvent.Duration) ||
+				(event.StartTime.GetSeconds()+event.Duration >= storageEvent.StartTime.GetSeconds() &&
+					event.StartTime.GetSeconds()+event.Duration <= storageEvent.StartTime.GetSeconds()+storageEvent.Duration)) {
 			return true
 		}
 	}
 	return false
+}
+
+func (s *EventLocalStorage) getEvents(startDate, endDate time.Time) []*calendar.Event {
+	var events []*calendar.Event
+
+	startTime := startDate.Unix()
+	endTime := endDate.Unix()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	index := 0
+	for _, event := range s.events {
+		if startTime <= event.StartTime.GetSeconds() && endTime >= event.StartTime.GetSeconds() {
+			events = append(events, event)
+			index++
+		}
+	}
+
+	return events
 }

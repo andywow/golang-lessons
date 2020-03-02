@@ -3,7 +3,7 @@ module github.com/andywow/golang-lessons/lesson-calendar
 go 1.13
 
 require (
-	github.com/golang/protobuf v1.3.3 // indirect
+	github.com/golang/protobuf v1.3.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/prometheus/client_golang v1.4.0
@@ -20,6 +20,7 @@ require (
 	golang.org/x/sys v0.0.0-20200124204421-9fbb57f87de9 // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools v0.0.0-20200131211209-ecb101ed6550 // indirect
+	google.golang.org/grpc v1.27.0
 	gopkg.in/ini.v1 v1.52.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8
 )
