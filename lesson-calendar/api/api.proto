@@ -1,11 +1,25 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
-import "event.proto";
 
 package calendar;
 
-option go_package = "github.com/andywow/golang-lessons/lesson-calendar/protobuf/internal/grpcserver";
+option go_package = "github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi";
+
+// event
+message Event {
+  string uuid = 1;
+  google.protobuf.Timestamp start_time = 2;
+  int64 duration = 3;
+  string header = 4;
+  string description = 5;
+  string user = 6;
+}
+
+// event list
+message EventList {
+  repeated Event events = 1;
+} 
 
 // delete event response code
 message EventDeleteStatus {

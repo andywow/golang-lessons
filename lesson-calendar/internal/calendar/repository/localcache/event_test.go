@@ -5,17 +5,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func createTestEvent(t *testing.T, date time.Time) calendar.Event {
+func createTestEvent(t *testing.T, date time.Time) eventapi.Event {
 	t.Helper()
 	pdate, _ := ptypes.TimestampProto(date)
-	return calendar.Event{
+	return eventapi.Event{
 		StartTime:   pdate,
 		Duration:    3600,
 		Header:      "test",

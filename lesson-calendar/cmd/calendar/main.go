@@ -61,7 +61,9 @@ func main() {
 
 	sugar.Infof("Starting server on %s", cfg.GRPCListen)
 
-	grpcserver.StartServer(cfg.GRPCListen,
+	apiServer := grpcserver.APIServer{}
+
+	apiServer.StartServer(cfg.GRPCListen,
 		grpcserver.WithLogger(logger), grpcserver.WithRepository(&repository))
 
 }
