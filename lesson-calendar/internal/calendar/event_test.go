@@ -2,9 +2,9 @@ package calendar
 
 import (
 	"testing"
+	"time"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,12 +13,13 @@ func TestCheckEventData(t *testing.T) {
 	err := CheckEventData(event)
 	require.Error(t, err)
 
+	eventTime := time.Now()
 	event = &eventapi.Event{
-		StartTime:   ptypes.TimestampNow(),
-		Duration:    60 * 60,
+		StartTime:   &eventTime,
+		Duration:    60,
 		Header:      "test",
 		Description: "test",
-		User:        "test",
+		Username:    "test",
 	}
 	err = CheckEventData(event)
 	require.NoError(t, err)

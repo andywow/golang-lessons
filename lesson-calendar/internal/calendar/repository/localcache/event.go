@@ -35,8 +35,8 @@ func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *eventapi.Eve
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if s.checkIfEventBusy(event) {
-		return repository.ErrDateBusy
+	if err := s.CheckIfTimeIsBusy(ctx, event); err != nil {
+		return err
 	}
 
 	s.currentUUID++
@@ -49,7 +49,7 @@ func (s *EventLocalStorage) CreateEvent(ctx context.Context, event *eventapi.Eve
 		Duration:    event.Duration,
 		Header:      event.Header,
 		Description: event.Description,
-		User:        event.User,
+		Username:    event.Username,
 	}
 
 	return nil
@@ -104,30 +104,31 @@ func (s *EventLocalStorage) UpdateEvent(ctx context.Context, event *eventapi.Eve
 		return repository.ErrEventNotFound
 	}
 
-	if s.checkIfEventBusy(event) {
-		return repository.ErrDateBusy
+	if err := s.CheckIfTimeIsBusy(ctx, event); err != nil {
+		return err
 	}
 
 	s.events[event.Uuid].StartTime = event.StartTime
 	s.events[event.Uuid].Duration = event.Duration
 	s.events[event.Uuid].Header = event.Header
 	s.events[event.Uuid].Description = event.Description
-	s.events[event.Uuid].User = event.User
+	s.events[event.Uuid].Username = event.Username
 
 	return nil
 }
 
-func (s *EventLocalStorage) checkIfEventBusy(event *eventapi.Event) bool {
+// CheckIfTimeIsBusy check if time is busy
+func (s *EventLocalStorage) CheckIfTimeIsBusy(ctx context.Context, event *eventapi.Event) error {
 	for _, storageEvent := range s.events {
 		if event.Uuid != storageEvent.Uuid &&
-			((event.StartTime.GetSeconds() >= storageEvent.StartTime.GetSeconds() &&
-				event.StartTime.GetSeconds() <= storageEvent.StartTime.GetSeconds()+storageEvent.Duration) ||
-				(event.StartTime.GetSeconds()+event.Duration >= storageEvent.StartTime.GetSeconds() &&
-					event.StartTime.GetSeconds()+event.Duration <= storageEvent.StartTime.GetSeconds()+storageEvent.Duration)) {
-			return true
+			((event.StartTime.Unix() >= storageEvent.StartTime.Unix() &&
+				event.StartTime.Unix() <= storageEvent.StartTime.Add(time.Duration(storageEvent.Duration)*time.Minute).Unix()) ||
+				(event.StartTime.Add(time.Duration(event.Duration)*time.Minute).Unix() >= storageEvent.StartTime.Unix() &&
+					event.StartTime.Add(time.Duration(event.Duration)*time.Minute).Unix() <= storageEvent.StartTime.Add(time.Duration(storageEvent.Duration)*time.Minute).Unix())) {
+			return repository.ErrDateBusy
 		}
 	}
-	return false
+	return nil
 }
 
 func (s *EventLocalStorage) getEvents(startDate, endDate time.Time) []*eventapi.Event {
@@ -141,7 +142,7 @@ func (s *EventLocalStorage) getEvents(startDate, endDate time.Time) []*eventapi.
 
 	index := 0
 	for _, event := range s.events {
-		if startTime <= event.StartTime.GetSeconds() && endTime >= event.StartTime.GetSeconds() {
+		if startTime <= event.StartTime.Unix() && endTime >= event.StartTime.Unix() {
 			events = append(events, event)
 			index++
 		}

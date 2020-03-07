@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/dbstorage"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/grpc/apiserver"
+
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/localcache"
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/grpcserver"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -23,10 +26,10 @@ func init() {
 
 	// default values
 	cfg = config.Config{
-		HTTPListen:  "127.0.0.1:8080",
+		GRPCListen:  "127.0.0.1:9090",
 		LogLevel:    "info",
 		LogStdout:   true,
-		StorageType: "Memory",
+		StorageType: "memory",
 	}
 }
 
@@ -56,14 +59,24 @@ func main() {
 
 	sugar := logger.Sugar()
 
-	repository := localcache.NewEventLocalStorage()
+	var repository repository.EventRepository
+	switch cfg.StorageType {
+	case "database":
+		repository, err = dbstorage.NewDatabaseStorage(
+			cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBUser, cfg.DBPassword)
+		if err != nil {
+			sugar.Fatalf("error, while connecting to database: %s\n", err)
+		}
+	default:
+		repository = localcache.NewEventLocalStorage()
+	}
 	logger.Info("Storage initialized")
 
 	sugar.Infof("Starting server on %s", cfg.GRPCListen)
 
-	apiServer := grpcserver.APIServer{}
+	apiServer := apiserver.APIServer{}
 
 	apiServer.StartServer(cfg.GRPCListen,
-		grpcserver.WithLogger(logger), grpcserver.WithRepository(&repository))
+		apiserver.WithLogger(logger), apiserver.WithRepository(&repository))
 
 }

@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 package calendar;
 
@@ -8,41 +9,46 @@ option go_package = "github.com/andywow/golang-lessons/lesson-calendar/pkg/event
 
 // event
 message Event {
-  string uuid = 1;
-  google.protobuf.Timestamp start_time = 2;
-  int64 duration = 3;
-  string header = 4;
-  string description = 5;
-  string user = 6;
+  string uuid = 1; // event id
+  google.protobuf.Timestamp start_time = 2 [(gogoproto.stdtime) = true]; // event start time
+  int64 duration = 3; // event duration in minutes
+  string header = 4; // event header
+  string description = 5; // event description
+  string username = 6; // event user name
+  int64 notification_period = 7; // time in minutes before notification
 }
 
 // event list
 message EventList {
-  repeated Event events = 1;
+  repeated Event events = 1; // list of events
 } 
 
-// delete event response code
+// delete event
+message EventDelete {
+  string uuid = 1; // event uuid
+}
+
+// delete event response code (empty response)
 message EventDeleteStatus {
-  bool deleted = 1;
 }
 
 // event date
 message EventDate {
-  google.protobuf.Timestamp date = 1;
+  google.protobuf.Timestamp date = 1 [(gogoproto.stdtime) = true];
 }
 
 // api server
 service ApiServer {
   // CreateEvent create event
-  rpc CreateEvent(calendar.Event) returns (calendar.Event);
+  rpc CreateEvent(Event) returns (Event);
   // UpdateEvent update event 
-  rpc UpdateEvent(calendar.Event) returns (calendar.Event);
+  rpc UpdateEvent(Event) returns (Event);
   // DeteleEvent delete event
-  rpc DeleteEvent(calendar.Event) returns (EventDeleteStatus);
+  rpc DeleteEvent(EventDelete) returns (EventDeleteStatus);
   // GetEventsForDate get events for date
-  rpc GetEventsForDate(EventDate) returns (calendar.EventList);
+  rpc GetEventsForDate(EventDate) returns (EventList);
   // GetEventsForWeek get events for weak
-  rpc GetEventsForWeek(EventDate) returns (calendar.EventList);
+  rpc GetEventsForWeek(EventDate) returns (EventList);
   // GetEventsForMonth get events for month
-  rpc GetEventsForMonth(EventDate) returns (calendar.EventList);
+  rpc GetEventsForMonth(EventDate) returns (EventList);
 }

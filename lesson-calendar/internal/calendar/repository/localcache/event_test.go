@@ -7,20 +7,18 @@ import (
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
 	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func createTestEvent(t *testing.T, date time.Time) eventapi.Event {
 	t.Helper()
-	pdate, _ := ptypes.TimestampProto(date)
 	return eventapi.Event{
-		StartTime:   pdate,
-		Duration:    3600,
+		StartTime:   &date,
+		Duration:    60,
 		Header:      "test",
 		Description: "test",
-		User:        "test",
+		Username:    "test",
 	}
 }
 
@@ -155,7 +153,8 @@ func TestUpdateEvent(t *testing.T) {
 	require.NoError(t, err)
 
 	// update event
-	event.StartTime.Seconds = event.StartTime.Seconds + 60*60*24
+	newTime := event.StartTime.Add(time.Duration(60*24) * time.Minute)
+	event.StartTime = &newTime
 	err = s.UpdateEvent(context.Background(), &event)
 	require.NoError(t, err)
 

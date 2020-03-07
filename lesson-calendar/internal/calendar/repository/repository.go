@@ -9,6 +9,7 @@ import (
 
 // EventRepository work with data store
 type EventRepository interface {
+	CheckIfTimeIsBusy(ctx context.Context, event *eventapi.Event) error
 	CreateEvent(ctx context.Context, event *eventapi.Event) error
 	GetEventsForDate(ctx context.Context, date time.Time) ([]*eventapi.Event, error)
 	GetEventsForWeek(ctx context.Context, date time.Time) ([]*eventapi.Event, error)

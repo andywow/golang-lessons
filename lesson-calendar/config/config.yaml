@@ -4,3 +4,11 @@ http_listen: 127.0.0.1:8080
 log_console: true
 #log_file: calendar.log
 log_level: debug
+# storage type
+storage_type: database
+# db settings
+db_host: 127.0.0.1
+db_port: 5432
+db_name: postgres
+db_user: calendar
+db_password: calendar
