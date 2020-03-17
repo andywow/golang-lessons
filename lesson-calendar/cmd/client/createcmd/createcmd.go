@@ -49,11 +49,11 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 
 			client := eventapi.NewApiServerClient(connection)
 
-			_, err = client.CreateEvent(context.Background(), cmdOpts.Event)
+			event, err := client.CreateEvent(context.Background(), cmdOpts.Event)
 			if err != nil {
 				log.Fatal(err)
 			}
-			log.Println("event created")
+			log.Printf("event created: %s\n", event.Uuid)
 		},
 	}
 

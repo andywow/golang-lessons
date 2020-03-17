@@ -59,7 +59,7 @@ func (s *EventDatabase) CheckIfTimeIsBusy(ctx context.Context, event *eventapi.E
 	}
 	rs, err := s.Database.NamedQueryContext(ctx,
 		`select count(*) as count from calendar.event where
-			uuid!=:uuid and username=:username
+			uuid!=:uuid and username=:username and deleted=false 
 			and (
 				(:start_time>=start_time and :start_time<=start_time + duration * interval '1 minute') 
 				or 
@@ -138,7 +138,7 @@ func (s *EventDatabase) DeleteEvent(ctx context.Context, uuid string) error {
 		return err
 	}
 	rs, err := s.Database.ExecContext(ctx,
-		`delete from calendar.event where uuid=$1`,
+		`update calendar.event set deleted=true where uuid=$1`,
 		uuid)
 	if err != nil {
 		return errors.Wrap(err, "could not execute delete query")
@@ -206,7 +206,8 @@ func (s *EventDatabase) getEvents(ctx context.Context, startDate, endDate time.T
 		return nil, err
 	}
 	rs, err := s.Database.NamedQueryContext(ctx,
-		`select * from calendar.event where 
+		`select uuid, start_time, duration, header, description, username from calendar.event where 
+		  deleted=false and 
 			start_time>=:start_time and 
 			start_time<=:end_time`,
 		map[string]interface{}{
