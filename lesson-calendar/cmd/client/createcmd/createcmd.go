@@ -62,6 +62,7 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 	cmd.PersistentFlags().StringVar(&cmdOpts.Event.Header, "header", "WOW", "event header")
 	cmd.PersistentFlags().StringVar(&cmdOpts.Event.Description, "description", "my description", "event description")
 	cmd.PersistentFlags().StringVar(&cmdOpts.Event.Username, "user", "test", "user name")
+	cmd.PersistentFlags().Int64Var(&cmdOpts.Event.NotificationPeriod, "notification_period", 0, "notification name")
 
 	cmd.MarkPersistentFlagRequired("starttime")
 	cmd.MarkPersistentFlagRequired("duration")

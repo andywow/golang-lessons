@@ -114,7 +114,7 @@ func (s APIServer) GetEventsForMonth(ctx context.Context, in *eventapi.EventDate
 }
 
 // StartServer start http server
-func (s APIServer) StartServer(address string, opts ...Option) error {
+func (s APIServer) StartServer(ctx context.Context, address string, opts ...Option) error {
 	options := options{
 		logger: zap.NewNop(),
 	}
@@ -133,6 +133,13 @@ func (s APIServer) StartServer(address string, opts ...Option) error {
 	reflection.Register(grpcServer)
 
 	eventapi.RegisterApiServerServer(grpcServer, s)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			grpcServer.GracefulStop()
+		}
+	}()
 
 	return grpcServer.Serve(listener)
 }

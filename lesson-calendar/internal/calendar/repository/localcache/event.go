@@ -2,6 +2,7 @@ package localcache
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -23,6 +24,11 @@ func NewEventLocalStorage() repository.EventRepository {
 	return &EventLocalStorage{
 		events: make(map[string]*eventapi.Event),
 	}
+}
+
+// Close fake close
+func (s *EventLocalStorage) Close() error {
+	return nil
 }
 
 // CreateEvent create event
@@ -74,6 +80,11 @@ func (s *EventLocalStorage) GetEventsForMonth(ctx context.Context, date time.Tim
 	startTime := date.Truncate(24 * time.Hour)
 	endTime := date.Truncate(24*time.Hour).AddDate(0, 1, 0)
 	return s.getEvents(startTime, endTime), nil
+}
+
+// GetEventsForNotification get events for send notifications
+func (s *EventLocalStorage) GetEventsForNotification(ctx context.Context, date time.Time) ([]*eventapi.Event, error) {
+	return nil, errors.New("unimplemented")
 }
 
 // DeleteEvent delete event

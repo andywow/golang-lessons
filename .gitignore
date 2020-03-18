@@ -14,3 +14,4 @@
 lesson10/**/*.txt
 
 *.log
+*/build/*

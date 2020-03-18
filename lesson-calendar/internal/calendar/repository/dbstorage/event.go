@@ -23,7 +23,8 @@ type EventDatabase struct {
 }
 
 // NewDatabaseStorage constructor
-func NewDatabaseStorage(dbHost string, dbPort int, dbName, dbUser, dbPassword string) (repository.EventRepository, error) {
+func NewDatabaseStorage(ctx context.Context, dbHost string, dbPort int,
+	dbName, dbUser, dbPassword string) (repository.EventRepository, error) {
 	db, err := sqlx.Connect("pgx", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		dbUser, dbPassword, dbHost, dbPort, dbName))
 	if err != nil {
@@ -39,9 +40,18 @@ func NewDatabaseStorage(dbHost string, dbPort int, dbName, dbUser, dbPassword st
 	db.Mapper = reflectx.NewMapperFunc("json", func(str string) string {
 		return str
 	})
-	return &EventDatabase{
+	eventDatabase := EventDatabase{
 		Database: db,
-	}, nil
+	}
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			db.Close()
+		}
+	}()
+
+	return &eventDatabase, nil
 }
 
 // CheckIfTimeIsBusy check if event time is busy
@@ -61,9 +71,9 @@ func (s *EventDatabase) CheckIfTimeIsBusy(ctx context.Context, event *eventapi.E
 		`select count(*) as count from calendar.event where
 			uuid!=:uuid and username=:username and deleted=false 
 			and (
-				(:start_time>=start_time and :start_time<=start_time + duration * interval '1 minute') 
+				(:start_time>=start_time and :start_time<start_time + duration * interval '1 minute') 
 				or 
-				(:end_time>=start_time and :end_time<=start_time + duration * interval '1 minute')
+				(:end_time>start_time and :end_time<=start_time + duration * interval '1 minute')
 			)`,
 		map[string]interface{}{
 			"uuid":       intUUID,
@@ -86,6 +96,14 @@ func (s *EventDatabase) CheckIfTimeIsBusy(ctx context.Context, event *eventapi.E
 		return nil
 	}
 	return errors.New("could not get select result")
+}
+
+// Close connection
+func (s *EventDatabase) Close() error {
+	if err := s.Database.Close(); err != nil {
+		return errors.Wrap(err, "fail to close connection")
+	}
+	return nil
 }
 
 // CreateEvent create event
@@ -130,6 +148,32 @@ func (s *EventDatabase) GetEventsForMonth(ctx context.Context, date time.Time) (
 	startTime := date.Truncate(24 * time.Hour)
 	endTime := date.Truncate(24*time.Hour).AddDate(0, 1, 0)
 	return s.getEvents(ctx, startTime, endTime)
+}
+
+// GetEventsForNotification get events for send notifications
+func (s *EventDatabase) GetEventsForNotification(ctx context.Context, date time.Time) ([]*eventapi.Event, error) {
+	if err := s.verifyConnection(ctx); err != nil {
+		return nil, err
+	}
+	rs, err := s.Database.NamedQueryContext(ctx,
+		`select uuid, start_time, duration, header, description, username, notification_period from calendar.event where 
+			deleted=false and notification_period!=0 and 
+			start_time - :current_time = + notification_period * interval '1 minute'`,
+		map[string]interface{}{
+			"current_time": date,
+		})
+	if err != nil {
+		return nil, errors.Wrap(err, "could not execute get event for notification statement")
+	}
+	events := []*eventapi.Event{}
+	for rs.Next() {
+		var event eventapi.Event
+		if err := rs.StructScan(&event); err != nil {
+			return nil, errors.Wrap(err, "could not parse select result")
+		}
+		events = append(events, &event)
+	}
+	return events, nil
 }
 
 // DeleteEvent delete event
@@ -206,7 +250,7 @@ func (s *EventDatabase) getEvents(ctx context.Context, startDate, endDate time.T
 		return nil, err
 	}
 	rs, err := s.Database.NamedQueryContext(ctx,
-		`select uuid, start_time, duration, header, description, username from calendar.event where 
+		`select uuid, start_time, duration, header, description, username, notification_period from calendar.event where 
 		  deleted=false and 
 			start_time>=:start_time and 
 			start_time<=:end_time`,
@@ -220,8 +264,7 @@ func (s *EventDatabase) getEvents(ctx context.Context, startDate, endDate time.T
 	events := []*eventapi.Event{}
 	for rs.Next() {
 		var event eventapi.Event
-		err := rs.StructScan(&event)
-		if err != nil {
+		if err := rs.StructScan(&event); err != nil {
 			return nil, errors.Wrap(err, "could not parse select result")
 		}
 		events = append(events, &event)

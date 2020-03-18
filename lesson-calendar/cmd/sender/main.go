@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/dbstorage"
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/grpc/apiserver"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/msgsystem/rabbitmq"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/sender"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
@@ -27,15 +27,14 @@ func init() {
 
 	// default values
 	cfg = config.Config{
-		GRPCListen:  "127.0.0.1:9090",
-		LogLevel:    "info",
-		LogStdout:   true,
-		StorageType: "memory",
+		RabbitMQHost: "127.0.0.1",
+		RabbitMQPort: 5672,
+		LogLevel:     "info",
+		LogStdout:    true,
 	}
 }
 
 func main() {
-
 	viper.SetConfigFile(viper.GetString("configfile"))
 	viper.SetConfigType("yaml")
 
@@ -63,16 +62,15 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	repository, err := dbstorage.NewDatabaseStorage(ctx,
-		cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBUser, cfg.DBPassword)
+	rabbitmq, err := rabbitmq.NewRabbitMQ(ctx,
+		cfg.RabbitMQHost, cfg.RabbitMQPort, cfg.RabbitMQLogin, cfg.RabbitMQPassword, cfg.RabbitMQQueue,
+	)
 	if err != nil {
-		sugar.Fatalf("failed initialize storage: %v", err)
+		sugar.Fatalf("error, while connecting to message system: %s\n", err)
 	}
-	logger.Info("Storage initialized")
+	sugar.Info("Message system initialized")
 
-	sugar.Infof("Starting server on %s", cfg.GRPCListen)
-
-	apiServer := apiserver.APIServer{}
+	cron := sender.Sender{}
 
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
@@ -82,7 +80,7 @@ func main() {
 		cancel()
 	}()
 
-	apiServer.StartServer(ctx, cfg.GRPCListen,
-		apiserver.WithLogger(logger), apiserver.WithRepository(&repository))
+	cron.Start(ctx,
+		sender.WithLogger(logger), sender.WithMsgSystem(&rabbitmq))
 
 }

@@ -10,10 +10,12 @@ import (
 // EventRepository work with data store
 type EventRepository interface {
 	CheckIfTimeIsBusy(ctx context.Context, event *eventapi.Event) error
+	Close() error
 	CreateEvent(ctx context.Context, event *eventapi.Event) error
 	GetEventsForDate(ctx context.Context, date time.Time) ([]*eventapi.Event, error)
 	GetEventsForWeek(ctx context.Context, date time.Time) ([]*eventapi.Event, error)
 	GetEventsForMonth(ctx context.Context, date time.Time) ([]*eventapi.Event, error)
+	GetEventsForNotification(ctx context.Context, date time.Time) ([]*eventapi.Event, error)
 	DeleteEvent(ctx context.Context, uuid string) error
 	UpdateEvent(ctx context.Context, event *eventapi.Event) error
 }

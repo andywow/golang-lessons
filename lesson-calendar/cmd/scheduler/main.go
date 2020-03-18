@@ -8,11 +8,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/dbstorage"
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/grpc/apiserver"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/msgsystem/rabbitmq"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/dbstorage"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/scheduler"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -27,15 +28,14 @@ func init() {
 
 	// default values
 	cfg = config.Config{
-		GRPCListen:  "127.0.0.1:9090",
-		LogLevel:    "info",
-		LogStdout:   true,
-		StorageType: "memory",
+		RabbitMQHost: "127.0.0.1",
+		RabbitMQPort: 5672,
+		LogLevel:     "info",
+		LogStdout:    true,
 	}
 }
 
 func main() {
-
 	viper.SetConfigFile(viper.GetString("configfile"))
 	viper.SetConfigType("yaml")
 
@@ -66,23 +66,30 @@ func main() {
 	repository, err := dbstorage.NewDatabaseStorage(ctx,
 		cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBUser, cfg.DBPassword)
 	if err != nil {
-		sugar.Fatalf("failed initialize storage: %v", err)
+		sugar.Fatalf("error, while connecting to database: %s\n", err)
 	}
-	logger.Info("Storage initialized")
+	sugar.Info("Storage initialized")
 
-	sugar.Infof("Starting server on %s", cfg.GRPCListen)
+	rabbitmq, err := rabbitmq.NewRabbitMQ(ctx,
+		cfg.RabbitMQHost, cfg.RabbitMQPort, cfg.RabbitMQLogin, cfg.RabbitMQPassword, cfg.RabbitMQQueue,
+	)
+	if err != nil {
+		sugar.Fatalf("error, while connecting to message system: %s\n", err)
+	}
+	sugar.Info("Message system initialized")
 
-	apiServer := apiserver.APIServer{}
+	cron := scheduler.Scheduler{}
 
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		sig := <-signalChannel
 		sugar.Infof("received signal: %s", sig)
+		sugar.Info("wait maximum 1 minute for correct termination")
 		cancel()
 	}()
 
-	apiServer.StartServer(ctx, cfg.GRPCListen,
-		apiserver.WithLogger(logger), apiserver.WithRepository(&repository))
+	cron.Start(ctx,
+		scheduler.WithLogger(logger), scheduler.WithRepository(&repository), scheduler.WithMsgSystem(&rabbitmq))
 
 }
