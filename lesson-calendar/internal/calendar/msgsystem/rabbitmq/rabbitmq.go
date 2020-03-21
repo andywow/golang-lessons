@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/msgsystem"
 
 	"github.com/pkg/errors"
@@ -20,9 +21,8 @@ type RabbitMQ struct {
 }
 
 // NewRabbitMQ return new instance
-func NewRabbitMQ(ctx context.Context, host string, port int,
-	login, password, queue string) (msgsystem.MsgSystem, error) {
-	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d", login, password, host, port))
+func NewRabbitMQ(ctx context.Context, cfg config.RabbitMQConfig) (msgsystem.MsgSystem, error) {
+	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d", cfg.User, cfg.Password, cfg.Host, cfg.Port))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed connect to server")
 	}
@@ -30,7 +30,7 @@ func NewRabbitMQ(ctx context.Context, host string, port int,
 	if err != nil {
 		return nil, errors.Wrap(err, "failed open channel")
 	}
-	q, err := ch.QueueDeclare(queue, true, false, false, false, nil)
+	queue, err := ch.QueueDeclare(cfg.Queue, true, false, false, false, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed top queue")
 	}
@@ -38,7 +38,7 @@ func NewRabbitMQ(ctx context.Context, host string, port int,
 	m := RabbitMQ{
 		conn:  conn,
 		ch:    ch,
-		queue: &q,
+		queue: &queue,
 	}
 
 	go func() {

@@ -6,15 +6,19 @@ log_console: true
 log_level: debug
 # storage type
 storage_type: database
+
 # db settings
-db_host: 127.0.0.1
-db_port: 5432
-db_name: postgres
-db_user: calendar
-db_password: calendar
+db:
+  host: 127.0.0.1
+  port: 5432
+  name: postgres
+  user: calendar
+  password: calendar
+
 # rabbitmq settings
-rabbitmq_host: 127.0.0.1
-rabbitmq_port: 5672
-rabbitmq_queue: nofifications
-rabbitmq_login: guest
-rabbitmq_password: guest
+rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  queue: nofifications
+  user: guest
+  password: guest

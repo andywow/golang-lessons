@@ -27,10 +27,8 @@ func init() {
 
 	// default values
 	cfg = config.Config{
-		RabbitMQHost: "127.0.0.1",
-		RabbitMQPort: 5672,
-		LogLevel:     "info",
-		LogStdout:    true,
+		LogLevel:  "info",
+		LogStdout: true,
 	}
 }
 
@@ -38,14 +36,12 @@ func main() {
 	viper.SetConfigFile(viper.GetString("configfile"))
 	viper.SetConfigType("yaml")
 
-	err := viper.ReadInConfig()
-	if err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("could not read config: %s\n", err)
 		os.Exit(1)
 	}
 
-	err = viper.Unmarshal(&cfg)
-	if err != nil {
+	if err := viper.Unmarshal(&cfg); err != nil {
 		fmt.Printf("could not read config: %s\n", err)
 		os.Exit(1)
 	}
@@ -62,9 +58,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	rabbitmq, err := rabbitmq.NewRabbitMQ(ctx,
-		cfg.RabbitMQHost, cfg.RabbitMQPort, cfg.RabbitMQLogin, cfg.RabbitMQPassword, cfg.RabbitMQQueue,
-	)
+	rabbitmq, err := rabbitmq.NewRabbitMQ(ctx, cfg.RabbitMQ)
 	if err != nil {
 		sugar.Fatalf("error, while connecting to message system: %s\n", err)
 	}

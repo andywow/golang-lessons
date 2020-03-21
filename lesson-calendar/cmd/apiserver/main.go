@@ -39,14 +39,12 @@ func main() {
 	viper.SetConfigFile(viper.GetString("configfile"))
 	viper.SetConfigType("yaml")
 
-	err := viper.ReadInConfig()
-	if err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("could not read config: %s\n", err)
 		os.Exit(1)
 	}
 
-	err = viper.Unmarshal(&cfg)
-	if err != nil {
+	if err := viper.Unmarshal(&cfg); err != nil {
 		fmt.Printf("could not read config: %s\n", err)
 		os.Exit(1)
 	}
@@ -63,8 +61,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	repository, err := dbstorage.NewDatabaseStorage(ctx,
-		cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBUser, cfg.DBPassword)
+	repository, err := dbstorage.NewDatabaseStorage(ctx, cfg.DB)
 	if err != nil {
 		sugar.Fatalf("failed initialize storage: %v", err)
 	}

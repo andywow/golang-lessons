@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
 	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 	"github.com/pkg/errors"
@@ -23,10 +24,9 @@ type EventDatabase struct {
 }
 
 // NewDatabaseStorage constructor
-func NewDatabaseStorage(ctx context.Context, dbHost string, dbPort int,
-	dbName, dbUser, dbPassword string) (repository.EventRepository, error) {
+func NewDatabaseStorage(ctx context.Context, cfg config.DBConfig) (repository.EventRepository, error) {
 	db, err := sqlx.Connect("pgx", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		dbUser, dbPassword, dbHost, dbPort, dbName))
+		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Database))
 	if err != nil {
 		return nil, errors.Wrap(err, "could not initialize db")
 	}
