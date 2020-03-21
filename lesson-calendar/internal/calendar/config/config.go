@@ -1,5 +1,13 @@
 package config
 
+import (
+	"flag"
+
+	"github.com/pkg/errors"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+)
+
 // DBConfig database config
 type DBConfig struct {
 	Database    string `mapstructure:"name"`
@@ -30,4 +38,34 @@ type Config struct {
 	LogStdout   bool           `mapstructure:"log_console"`
 	RabbitMQ    RabbitMQConfig `mapstructure:"rabbitmq"`
 	StorageType string         `mapstructure:"storage_type"`
+}
+
+func init() {
+	flag.String("configfile", "config.yaml", "config file path")
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
+}
+
+// ParseConfig parse config
+func ParseConfig() (*Config, error) {
+	viper.SetConfigFile(viper.GetString("configfile"))
+	viper.SetConfigType("yaml")
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, errors.Wrap(err, "could not read config")
+	}
+
+	// default values
+	cfg := Config{
+		LogLevel:  "info",
+		LogStdout: true,
+	}
+
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, errors.Wrap(err, "could not parse config")
+	}
+
+	return &cfg, nil
+
 }

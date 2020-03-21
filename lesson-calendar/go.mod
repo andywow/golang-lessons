@@ -32,4 +32,5 @@ require (
 	google.golang.org/grpc v1.27.0
 	gopkg.in/ini.v1 v1.54.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8
+	honnef.co/go/tools v0.0.1-2019.2.3
 )

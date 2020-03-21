@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -13,43 +12,17 @@ import (
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 )
-
-var cfg config.Config
-
-func init() {
-	flag.String("configfile", "config.yaml", "config file path")
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
-	viper.BindPFlags(pflag.CommandLine)
-
-	// default values
-	cfg = config.Config{
-		GRPCListen:  "127.0.0.1:9090",
-		LogLevel:    "info",
-		LogStdout:   true,
-		StorageType: "memory",
-	}
-}
 
 func main() {
 
-	viper.SetConfigFile(viper.GetString("configfile"))
-	viper.SetConfigType("yaml")
-
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("could not read config: %s\n", err)
+	cfg, err := config.ParseConfig()
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := viper.Unmarshal(&cfg); err != nil {
-		fmt.Printf("could not read config: %s\n", err)
-		os.Exit(1)
-	}
-
-	logger, err := logconfig.GetLoggerForConfig(&cfg)
+	logger, err := logconfig.GetLoggerForConfig(cfg)
 	if err != nil {
 		fmt.Printf("could not configure logger: %s\n", err)
 		os.Exit(1)
