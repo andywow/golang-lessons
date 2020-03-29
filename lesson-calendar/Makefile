@@ -26,3 +26,9 @@ build:
 	$(GO) build -o ./$(BUILD)/scheduler cmd/scheduler/main.go
 	$(GO) build -o ./$(BUILD)/sender cmd/sender/main.go
 	$(GO) build -o ./$(BUILD)/client cmd/client/main.go
+
+.PHONY: build
+docker:
+	docker build -f deploy/apiserver/Dockerfile -t andywow/calendar-apiserver:latest .
+	docker build -f deploy/scheduler/Dockerfile -t andywow/calendar-scheduler:latest .
+	docker build -f deploy/sender/Dockerfile -t andywow/calendar-sender:latest .

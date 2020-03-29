@@ -31,5 +31,5 @@ BASEDIR="$(readlink -f $(dirname $0))"
 
 docker run --rm --name migrate --network host -v ${BASEDIR}:/migrations migrate/migrate:latest \
   -path=/migrations \
-  -database "postgres://${DB_USER}:${DB_PASSOWRD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable&x-migrations-table=migrate" \
+  -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable&x-migrations-table=migrate" \
   up

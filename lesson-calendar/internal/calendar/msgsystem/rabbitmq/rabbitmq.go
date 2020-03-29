@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/msgsystem"
@@ -22,17 +23,36 @@ type RabbitMQ struct {
 
 // NewRabbitMQ return new instance
 func NewRabbitMQ(ctx context.Context, cfg config.RabbitMQConfig) (msgsystem.MsgSystem, error) {
-	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d", cfg.User, cfg.Password, cfg.Host, cfg.Port))
-	if err != nil {
-		return nil, errors.Wrap(err, "failed connect to server")
-	}
-	ch, err := conn.Channel()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed open channel")
-	}
-	queue, err := ch.QueueDeclare(cfg.Queue, true, false, false, false, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed top queue")
+	var (
+		conn  *amqp.Connection
+		ch    *amqp.Channel
+		queue amqp.Queue
+		err   error
+	)
+	for attempt := 0; attempt <= cfg.Retries; {
+		time.Sleep(5 * time.Second)
+		conn, err = amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d", cfg.User, cfg.Password, cfg.Host, cfg.Port))
+		if err != nil {
+			if attempt < cfg.Retries {
+				continue
+			}
+			return nil, errors.Wrap(err, "failed connect to server")
+		}
+		ch, err = conn.Channel()
+		if err != nil {
+			if attempt < cfg.Retries {
+				continue
+			}
+			return nil, errors.Wrap(err, "failed open channel")
+		}
+		queue, err = ch.QueueDeclare(cfg.Queue, true, false, false, false, nil)
+		if err != nil {
+			if attempt < cfg.Retries {
+				continue
+			}
+			return nil, errors.Wrap(err, "failed top queue")
+		}
+		break
 	}
 
 	m := RabbitMQ{

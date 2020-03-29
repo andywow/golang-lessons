@@ -25,6 +25,7 @@ type RabbitMQConfig struct {
 	Queue    string `mapstructure:"queue"`
 	Password string `mapstructure:"password"`
 	Port     int    `mapstructure:"port"`
+	Retries  int    `mapstructure:"retries"`
 	User     string `mapstructure:"user"`
 }
 

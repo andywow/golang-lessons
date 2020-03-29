@@ -14,4 +14,7 @@
 lesson10/**/*.txt
 
 *.log
-*/build/*
+**/build/*
+
+**/config/config.yaml
+**/.env

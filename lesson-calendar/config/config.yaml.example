@@ -1,6 +1,5 @@
 # config file example
-grpc_listen: 127.0.0.1:9090
-http_listen: 127.0.0.1:8080
+grpc_listen: 0.0.0.0:9090
 log_console: true
 #log_file: calendar.log
 log_level: debug
@@ -9,16 +8,17 @@ storage_type: database
 
 # db settings
 db:
-  host: 127.0.0.1
+  host: db
   port: 5432
   name: postgres
-  user: calendar
-  password: calendar
+  user: postgres
+  password: postgres
 
 # rabbitmq settings
 rabbitmq:
-  host: 127.0.0.1
+  host: mq
   port: 5672
   queue: nofifications
   user: guest
   password: guest
+  retries: 5

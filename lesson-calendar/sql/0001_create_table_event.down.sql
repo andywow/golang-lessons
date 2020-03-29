@@ -1,1 +1,1 @@
-drop table if exists calendar.event;
+drop table if exists event;
