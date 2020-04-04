@@ -89,7 +89,11 @@ func (s Scheduler) Start(ctx context.Context, opts ...Option) {
 		case <-ctx.Done():
 			return
 		default:
-			go s.sendEvents(ctx, nextTime)
+			go func() {
+				if err := s.sendEvents(ctx, nextTime); err != nil {
+					s.logger.Errorf("error, while sending events: %s", err)
+				}
+			}()
 		}
 		nextTime = nextTime.Add(time.Minute)
 	}

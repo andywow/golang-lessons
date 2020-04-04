@@ -45,10 +45,8 @@ func NewDatabaseStorage(ctx context.Context, cfg config.DBConfig) (repository.Ev
 	}
 
 	go func() {
-		select {
-		case <-ctx.Done():
-			db.Close()
-		}
+		<-ctx.Done()
+		db.Close()
 	}()
 
 	return &eventDatabase, nil

@@ -50,7 +50,7 @@ func (s Sender) Start(ctx context.Context, opts ...Option) {
 
 	s.logger.Info("listening for messages")
 
-	s.messageSystem.ReceiveMessages(ctx,
+	if err := s.messageSystem.ReceiveMessages(ctx,
 		func(internalCtx context.Context, message []byte) error {
 
 			event, err := calendar.ConvertFromJSON(message)
@@ -60,7 +60,9 @@ func (s Sender) Start(ctx context.Context, opts ...Option) {
 			s.logger.Infof("recevied message with uuid %s for user %s", event.Uuid, event.Username)
 			return nil
 
-		})
+		}); err != nil {
+		s.logger.Error("error receiveing messages: %v", err)
+	}
 
 }
 

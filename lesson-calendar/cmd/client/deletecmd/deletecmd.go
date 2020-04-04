@@ -41,7 +41,9 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 	}
 
 	cmd.PersistentFlags().StringVar(&deleteMessage.Uuid, "uuid", "", "event uuid")
-	cmd.MarkPersistentFlagRequired("uuid")
+	if err := cmd.MarkPersistentFlagRequired("uuid"); err != nil {
+		log.Fatal(err)
+	}
 
 	return cmd
 

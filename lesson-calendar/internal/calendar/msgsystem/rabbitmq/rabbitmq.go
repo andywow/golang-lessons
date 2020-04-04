@@ -62,10 +62,8 @@ func NewRabbitMQ(ctx context.Context, cfg config.RabbitMQConfig) (msgsystem.MsgS
 	}
 
 	go func() {
-		select {
-		case <-ctx.Done():
-			m.Close()
-		}
+		<-ctx.Done()
+		m.Close()
 	}()
 
 	return &m, nil

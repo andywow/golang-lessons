@@ -14,8 +14,6 @@ import (
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
 )
 
-var cfg config.Config
-
 func main() {
 
 	cfg, err := config.ParseConfig()
@@ -29,7 +27,11 @@ func main() {
 		fmt.Printf("could not configure logger: %s\n", err)
 		os.Exit(1)
 	}
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			fmt.Printf("could not sync logger: %v\n", err)
+		}
+	}()
 
 	sugar := logger.Sugar()
 

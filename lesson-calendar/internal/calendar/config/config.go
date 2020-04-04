@@ -45,7 +45,9 @@ func init() {
 	flag.String("configfile", "config.yaml", "config file path")
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
-	viper.BindPFlags(pflag.CommandLine)
+	if err := viper.BindPFlags(pflag.CommandLine); err != nil {
+		panic(err)
+	}
 }
 
 // ParseConfig parse config

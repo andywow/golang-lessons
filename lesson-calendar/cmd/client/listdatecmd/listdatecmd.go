@@ -39,8 +39,11 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 			}
 			cmdOpts.EventDate.Date = &eventTime
 
-			connection, err := grpc.Dial(fmt.Sprintf("%s:%d", opts.GRPCHost, opts.GRPCPort),
-				grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(10*time.Second))
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			connection, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", opts.GRPCHost, opts.GRPCPort),
+				grpc.WithInsecure(), grpc.WithBlock())
 			if err != nil {
 				log.Fatalf("could not connect: %v", err)
 			}
@@ -61,7 +64,9 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 	}
 
 	cmd.PersistentFlags().StringVar(&cmdOpts.date, "date", "", "events date - 2019.03.04")
-	cmd.MarkPersistentFlagRequired("date")
+	if err := cmd.MarkPersistentFlagRequired("date"); err != nil {
+		log.Fatal(err)
+	}
 
 	return cmd
 

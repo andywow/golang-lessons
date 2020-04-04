@@ -65,7 +65,9 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 	cmd.PersistentFlags().StringVar(&cmdOpts.Event.Header, "header", "", "event header")
 	cmd.PersistentFlags().StringVar(&cmdOpts.Event.Description, "description", "", "event description")
 
-	cmd.MarkPersistentFlagRequired("uuid")
+	if err := cmd.MarkPersistentFlagRequired("uuid"); err != nil {
+		log.Fatal(err)
+	}
 
 	return cmd
 

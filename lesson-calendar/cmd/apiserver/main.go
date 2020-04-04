@@ -27,7 +27,11 @@ func main() {
 		fmt.Printf("could not configure logger: %s\n", err)
 		os.Exit(1)
 	}
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			fmt.Printf("could not sync logger: %v\n", err)
+		}
+	}()
 
 	sugar := logger.Sugar()
 
@@ -52,7 +56,10 @@ func main() {
 		cancel()
 	}()
 
-	apiServer.StartServer(ctx, cfg.GRPCListen,
-		apiserver.WithLogger(logger), apiserver.WithRepository(&repository))
+	if err := apiServer.StartServer(ctx, cfg.GRPCListen,
+		apiserver.WithLogger(logger), apiserver.WithRepository(&repository)); err != nil {
+		sugar.Errorf("failed start api server: %v", err)
+		os.Exit(1)
+	}
 
 }

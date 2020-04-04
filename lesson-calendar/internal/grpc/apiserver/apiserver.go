@@ -135,10 +135,8 @@ func (s APIServer) StartServer(ctx context.Context, address string, opts ...Opti
 	eventapi.RegisterApiServerServer(grpcServer, s)
 
 	go func() {
-		select {
-		case <-ctx.Done():
-			grpcServer.GracefulStop()
-		}
+		<-ctx.Done()
+		grpcServer.GracefulStop()
 	}()
 
 	return grpcServer.Serve(listener)

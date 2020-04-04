@@ -32,8 +32,11 @@ var (
 
 // HandleHello handle /hello URL
 func handleHello(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello"))
+	_, err := w.Write([]byte("Hello"))
 	metricReqProcessed.Inc()
+	if err != nil {
+		logger.Error("Error while writing response: %v", err)
+	}
 	logger.Infof("Request processed from %s", r.RemoteAddr)
 }
 
@@ -59,8 +62,4 @@ func WithLogger(log *zap.Logger) Option {
 
 func (l loggerOption) apply(opts *options) {
 	opts.logger = l.Log
-}
-
-func recordMetric() {
-	metricReqProcessed.Inc()
 }

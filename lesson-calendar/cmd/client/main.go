@@ -29,8 +29,12 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&options.GRPCHost, "host", "127.0.0.1", "host of grpc server")
 	rootCmd.PersistentFlags().Int64Var(&options.GRPCPort, "port", 9090, "port of grpc server")
-	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
-	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+	if err := viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host")); err != nil {
+		log.Fatal(err)
+	}
+	if err := viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port")); err != nil {
+		log.Fatal(err)
+	}
 
 	rootCmd.AddCommand(createcmd.MakeCmd(&options))
 	rootCmd.AddCommand(updatecmd.MakeCmd(&options))

@@ -25,10 +25,14 @@ func main() {
 
 	logger, err := logconfig.GetLoggerForConfig(cfg)
 	if err != nil {
-		fmt.Printf("could not configure logger: %s\n", err)
+		fmt.Printf("could not configure logger: %v\n", err)
 		os.Exit(1)
 	}
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			fmt.Printf("could not sync logger: %v\n", err)
+		}
+	}()
 
 	sugar := logger.Sugar()
 
@@ -37,13 +41,13 @@ func main() {
 
 	repository, err := dbstorage.NewDatabaseStorage(ctx, cfg.DB)
 	if err != nil {
-		sugar.Fatalf("error, while connecting to database: %s\n", err)
+		sugar.Fatalf("error, while connecting to database: %s", err)
 	}
 	sugar.Info("Storage initialized")
 
 	rabbitmq, err := rabbitmq.NewRabbitMQ(ctx, cfg.RabbitMQ)
 	if err != nil {
-		sugar.Fatalf("error, while connecting to message system: %s\n", err)
+		sugar.Fatalf("error, while connecting to message system: %s", err)
 	}
 	sugar.Info("Message system initialized")
 

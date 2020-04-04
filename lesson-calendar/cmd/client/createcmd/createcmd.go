@@ -64,11 +64,21 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 	cmd.PersistentFlags().StringVar(&cmdOpts.Event.Username, "user", "test", "user name")
 	cmd.PersistentFlags().Int64Var(&cmdOpts.Event.NotificationPeriod, "notification_period", 0, "notification name")
 
-	cmd.MarkPersistentFlagRequired("starttime")
-	cmd.MarkPersistentFlagRequired("duration")
-	cmd.MarkPersistentFlagRequired("header")
-	cmd.MarkPersistentFlagRequired("description")
-	cmd.MarkPersistentFlagRequired("user")
+	if err := cmd.MarkPersistentFlagRequired("starttime"); err != nil {
+		log.Fatal(err)
+	}
+	if err := cmd.MarkPersistentFlagRequired("duration"); err != nil {
+		log.Fatal(err)
+	}
+	if err := cmd.MarkPersistentFlagRequired("header"); err != nil {
+		log.Fatal(err)
+	}
+	if err := cmd.MarkPersistentFlagRequired("description"); err != nil {
+		log.Fatal(err)
+	}
+	if err := cmd.MarkPersistentFlagRequired("user"); err != nil {
+		log.Fatal(err)
+	}
 
 	return cmd
 
