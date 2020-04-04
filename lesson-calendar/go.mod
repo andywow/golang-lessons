@@ -1,6 +1,6 @@
 module github.com/andywow/golang-lessons/lesson-calendar
 
-go 1.13
+go 1.14
 
 require (
 	github.com/apex/log v1.1.2
