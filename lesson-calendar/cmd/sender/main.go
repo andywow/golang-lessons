@@ -38,7 +38,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	rabbitmq, err := rabbitmq.NewRabbitMQ(ctx, cfg.RabbitMQ)
+	mqsystem, err := rabbitmq.NewRabbitMQ(ctx, cfg.RabbitMQ)
 	if err != nil {
 		sugar.Fatalf("error, while connecting to message system: %s\n", err)
 	}
@@ -55,6 +55,6 @@ func main() {
 	}()
 
 	cron.Start(ctx,
-		sender.WithLogger(logger), sender.WithMsgSystem(&rabbitmq))
+		sender.WithLogger(logger), sender.WithMsgSystem(&mqsystem))
 
 }

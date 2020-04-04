@@ -45,7 +45,7 @@ func main() {
 	}
 	sugar.Info("Storage initialized")
 
-	rabbitmq, err := rabbitmq.NewRabbitMQ(ctx, cfg.RabbitMQ)
+	mqsystem, err := rabbitmq.NewRabbitMQ(ctx, cfg.RabbitMQ)
 	if err != nil {
 		sugar.Fatalf("error, while connecting to message system: %s", err)
 	}
@@ -63,6 +63,6 @@ func main() {
 	}()
 
 	cron.Start(ctx,
-		scheduler.WithLogger(logger), scheduler.WithRepository(&repository), scheduler.WithMsgSystem(&rabbitmq))
+		scheduler.WithLogger(logger), scheduler.WithRepository(&repository), scheduler.WithMsgSystem(&mqsystem))
 
 }
