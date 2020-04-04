@@ -4,8 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 	"github.com/stretchr/testify/require"
+
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 )
 
 func TestCheckEventData(t *testing.T) {

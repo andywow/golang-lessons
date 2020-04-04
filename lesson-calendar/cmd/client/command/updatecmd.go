@@ -6,10 +6,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/client/config"
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/client/config"
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 )
 
 type updateCommandOptions struct {

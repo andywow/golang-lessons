@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar"
-
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/msgsystem"
 
 	"go.uber.org/zap"

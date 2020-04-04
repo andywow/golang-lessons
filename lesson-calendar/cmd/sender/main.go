@@ -7,11 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/msgsystem/rabbitmq"
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/sender"
-
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/msgsystem/rabbitmq"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/sender"
 )
 
 func main() {

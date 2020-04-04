@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 )
 
 func createTestEvent(t *testing.T, date time.Time) eventapi.Event {

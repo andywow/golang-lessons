@@ -3,8 +3,9 @@ package calendar
 import (
 	"encoding/json"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 	"github.com/pkg/errors"
+
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 )
 
 // CheckEventData check event data

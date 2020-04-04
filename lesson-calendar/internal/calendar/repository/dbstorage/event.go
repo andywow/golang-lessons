@@ -7,15 +7,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
-	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
-	"github.com/pkg/errors"
-
 	// init sql driver
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/reflectx"
+	"github.com/pkg/errors"
+
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
+	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
 )
 
 // EventDatabase event database

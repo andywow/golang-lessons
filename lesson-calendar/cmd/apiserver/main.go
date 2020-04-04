@@ -7,11 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/dbstorage"
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/grpc/apiserver"
-
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository/dbstorage"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/grpc/apiserver"
 )
 
 func main() {

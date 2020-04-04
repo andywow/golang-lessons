@@ -7,8 +7,9 @@ import (
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/msgsystem"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
 	"go.uber.org/zap"
+
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
 )
 
 // options

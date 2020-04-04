@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/command"
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/client/config"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/command"
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/client/config"
 )
 
 var (

@@ -5,14 +5,14 @@ import (
 	"errors"
 	"net"
 
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/repository"
 	"github.com/andywow/golang-lessons/lesson-calendar/pkg/eventapi"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 // options

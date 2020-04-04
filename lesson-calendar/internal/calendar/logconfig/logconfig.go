@@ -1,9 +1,10 @@
 package logconfig
 
 import (
-	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 )
 
 // GetLoggerForConfig get logger for config
