@@ -8,6 +8,7 @@ github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRF
 github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/andywow/golang-lessons v0.0.0-20200222194644-2fd34272fb3d h1:UiIZ8bTC8i93mzLPNVZRjzT/O6v3NwF6gpNXFwnriOg=
 github.com/andywow/golang-lessons v0.0.0-20200306200723-0a6c5b56f73d h1:JiZJkqBNJSjpvV+ML9m/STyAET71eepsOur6v3KN1vc=
+github.com/andywow/golang-lessons v0.0.0-20200404092206-83b908914e2b h1:2Pxn3rgX29jPcJXNO399dlxkVj2n3MpvmI3DvVXZdUk=
 github.com/apex/log v1.1.2 h1:bnDuVoi+o98wOdVqfEzNDlY0tcmBia7r4YkjS9EqGYk=
 github.com/apex/log v1.1.2/go.mod h1:SyfRweFO+TlkIJ3DVizTSeI1xk7jOIIqOnUPZQTTsww=
 github.com/apex/logs v0.0.3/go.mod h1:XzxuLZ5myVHDy9SAmYpamKKRNApGj54PfYLcFrXqDwo=

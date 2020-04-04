@@ -1,4 +1,4 @@
-package listweekcmd
+package command
 
 import (
 	"context"
@@ -12,19 +12,15 @@ import (
 	"google.golang.org/grpc"
 )
 
-const dateFormat = "2006.01.02"
-
-type options struct {
+type listWeekCommandOptions struct {
 	EventDate *eventapi.EventDate
 	date      string
 }
 
-var cmdOpts options
+// ListWeekCmd list week command
+func ListWeekCmd(opts *config.ClientOptions) *cobra.Command {
 
-// MakeCmd create command
-func MakeCmd(opts *config.ClientOptions) *cobra.Command {
-
-	cmdOpts = options{
+	cmdOpts := listWeekCommandOptions{
 		EventDate: &eventapi.EventDate{},
 	}
 

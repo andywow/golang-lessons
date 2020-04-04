@@ -1,4 +1,4 @@
-package listdatecmd
+package command
 
 import (
 	"context"
@@ -12,25 +12,21 @@ import (
 	"google.golang.org/grpc"
 )
 
-const dateFormat = "2006.01.02"
-
-type options struct {
+type listMonthOptions struct {
 	EventDate *eventapi.EventDate
 	date      string
 }
 
-var cmdOpts options
+// ListMonthCmd list month command
+func ListMonthCmd(opts *config.ClientOptions) *cobra.Command {
 
-// MakeCmd create command
-func MakeCmd(opts *config.ClientOptions) *cobra.Command {
-
-	cmdOpts = options{
+	cmdOpts := listMonthOptions{
 		EventDate: &eventapi.EventDate{},
 	}
 
 	cmd := &cobra.Command{
-		Use:   "listweek",
-		Short: "get events for week command",
+		Use:   "listmonth",
+		Short: "get events for month command",
 		Run: func(cmd *cobra.Command, args []string) {
 
 			eventTime, err := time.Parse(dateFormat, cmdOpts.date)
@@ -53,7 +49,7 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 			client := eventapi.NewApiServerClient(connection)
 
 			var events *eventapi.EventList
-			if events, err = client.GetEventsForWeek(context.Background(), cmdOpts.EventDate); err != nil {
+			if events, err = client.GetEventsForMonth(context.Background(), cmdOpts.EventDate); err != nil {
 				log.Fatalf("could not get events: %v", err)
 			}
 			log.Println("event list:")

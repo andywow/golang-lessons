@@ -1,4 +1,4 @@
-package updatecmd
+package command
 
 import (
 	"context"
@@ -12,19 +12,15 @@ import (
 	"google.golang.org/grpc"
 )
 
-const timeFormat = "2006.01.02 15:04"
-
-type options struct {
+type updateCommandOptions struct {
 	Event   *eventapi.Event
 	StrTime string
 }
 
-var cmdOpts options
+// UpdateCmd update command
+func UpdateCmd(opts *config.ClientOptions) *cobra.Command {
 
-// MakeCmd create command
-func MakeCmd(opts *config.ClientOptions) *cobra.Command {
-
-	cmdOpts = options{
+	cmdOpts := updateCommandOptions{
 		Event: &eventapi.Event{},
 	}
 
@@ -41,8 +37,11 @@ func MakeCmd(opts *config.ClientOptions) *cobra.Command {
 				cmdOpts.Event.StartTime = &eventTime
 			}
 
-			connection, err := grpc.Dial(fmt.Sprintf("%s:%d", opts.GRPCHost, opts.GRPCPort),
-				grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(10*time.Second))
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			connection, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", opts.GRPCHost, opts.GRPCPort),
+				grpc.WithInsecure(), grpc.WithBlock())
 			if err != nil {
 				log.Fatalf("could not connect: %v", err)
 			}

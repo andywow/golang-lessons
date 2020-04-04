@@ -3,12 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/createcmd"
-	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/deletecmd"
-	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/listdatecmd"
-	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/listmonthcmd"
-	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/listweekcmd"
-	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/updatecmd"
+	"github.com/andywow/golang-lessons/lesson-calendar/cmd/client/command"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/client/config"
 
 	"github.com/spf13/cobra"
@@ -36,12 +31,12 @@ func init() {
 		log.Fatal(err)
 	}
 
-	rootCmd.AddCommand(createcmd.MakeCmd(&options))
-	rootCmd.AddCommand(updatecmd.MakeCmd(&options))
-	rootCmd.AddCommand(deletecmd.MakeCmd(&options))
-	rootCmd.AddCommand(listdatecmd.MakeCmd(&options))
-	rootCmd.AddCommand(listweekcmd.MakeCmd(&options))
-	rootCmd.AddCommand(listmonthcmd.MakeCmd(&options))
+	rootCmd.AddCommand(command.CreateCmd(&options))
+	rootCmd.AddCommand(command.UpdateCmd(&options))
+	rootCmd.AddCommand(command.DeleteCmd(&options))
+	rootCmd.AddCommand(command.ListDateCmd(&options))
+	rootCmd.AddCommand(command.ListWeekCmd(&options))
+	rootCmd.AddCommand(command.ListMonthCmd(&options))
 
 }
 

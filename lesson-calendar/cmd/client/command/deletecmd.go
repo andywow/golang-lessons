@@ -1,4 +1,4 @@
-package deletecmd
+package command
 
 import (
 	"context"
@@ -12,20 +12,21 @@ import (
 	"google.golang.org/grpc"
 )
 
-var deleteMessage eventapi.EventDelete
+// DeleteCmd delete command
+func DeleteCmd(opts *config.ClientOptions) *cobra.Command {
 
-// MakeCmd create command
-func MakeCmd(opts *config.ClientOptions) *cobra.Command {
-
-	deleteMessage = eventapi.EventDelete{}
+	deleteMessage := eventapi.EventDelete{}
 
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "delete event command",
 		Run: func(cmd *cobra.Command, args []string) {
 
-			connection, err := grpc.Dial(fmt.Sprintf("%s:%d", opts.GRPCHost, opts.GRPCPort),
-				grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(10*time.Second))
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			connection, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", opts.GRPCHost, opts.GRPCPort),
+				grpc.WithInsecure(), grpc.WithBlock())
 			if err != nil {
 				log.Fatalf("could not connect: %v", err)
 			}
