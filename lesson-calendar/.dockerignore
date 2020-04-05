@@ -1,6 +1,8 @@
 build
-deploy
 config
+deploy
+docker-compose*
 sql
+tests/
 Makefile
-docker-compose.yml
+.env*

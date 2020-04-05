@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+
+  apiserver:
+    networks:
+      svcnet:
+        aliases:
+        - apiserver
+
+  tests:
+    build:
+      context: tests
+    command: "true"
+    environment:
+    - APISERVER_ADDRESS=apiserver:9090
+    depends_on:
+    - apiserver
+    networks:
+    - svcnet
+
+networks:
+  svcnet:
