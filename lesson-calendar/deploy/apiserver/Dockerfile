@@ -17,7 +17,7 @@ WORKDIR /app
 
 COPY --from=builder /go/src/app/build/apiserver /app/
 
-EXPOSE 9090
+EXPOSE 8080 9090
 
 ENTRYPOINT ["/app/apiserver"]
 CMD ["--configfile", "config.yaml"]

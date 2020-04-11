@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/config"
 	"github.com/andywow/golang-lessons/lesson-calendar/internal/calendar/logconfig"
@@ -51,6 +54,13 @@ func main() {
 		sig := <-signalChannel
 		sugar.Infof("received signal: %s", sig)
 		cancel()
+	}()
+
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		if err := http.ListenAndServe(cfg.HTTPListen, nil); err != nil {
+			sugar.Fatal("cannot start /metrics endpoint: ", err)
+		}
 	}()
 
 	cron.Start(ctx,

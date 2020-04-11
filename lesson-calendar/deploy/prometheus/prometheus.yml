@@ -1,0 +1,15 @@
+# my global config
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'db'
+    static_configs:
+    - targets: ['dbexporter:9187']
+  - job_name: 'apiserver'
+    static_configs:
+    - targets: ['apiserver:8080']
+  - job_name: 'sender'
+    static_configs:
+    - targets: ['sender:8080']

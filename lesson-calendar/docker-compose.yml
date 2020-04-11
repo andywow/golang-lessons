@@ -14,6 +14,23 @@ services:
     - "5432:5432"
     volumes:
     - "${POSTGRES_VOL}:/var/lib/postgresql/data"
+    - "/etc/localtime:/etc/localtime:ro"
+
+  dbexporter:
+    depends_on:
+    - db
+    environment:
+    - DATA_SOURCE_NAME=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?sslmode=disable
+    image: "wrouesnel/postgres_exporter:latest"
+    networks:
+      dbnet:
+      svcnet:
+        aliases:
+        - dbexporter
+    ports:
+    - "9187:9187"
+    volumes:
+    - "/etc/localtime:/etc/localtime:ro"
 
   mq:
     image: "rabbitmq:3-management"
@@ -26,6 +43,7 @@ services:
     - "15672:15672"
     volumes:
     - "${RABBITMQ_VOL}:/var/lib/rabbitmq"
+    - "/etc/localtime:/etc/localtime:ro"
 
   dbmigrate:
     command:
@@ -40,6 +58,7 @@ services:
     - dbnet
     volumes:
     - "./sql:/migrations"  
+    - "/etc/localtime:/etc/localtime:ro"
 
   apiserver:
     build:
@@ -50,11 +69,16 @@ services:
     - dbmigrate
     ports:
     - "8888:9090"
+    - "8080:8080"
     networks:
-    - dbnet
+      dbnet:
+      svcnet:
+        aliases:
+        - apiserver
     volumes:
     - "${CONFIG_PATH}:/app/config.yaml:ro"
-  
+    - "/etc/localtime:/etc/localtime:ro"
+
   scheduler:
     build:
       context: .
@@ -64,11 +88,15 @@ services:
     - dbmigrate
     - mq
     networks:
-    - dbnet
-    - mqnet
+      dbnet:
+      mqnet:
+      svcnet:
+        aliases:
+        - scheduler
     volumes:
     - "${CONFIG_PATH}:/app/config.yaml:ro"
-  
+    - "/etc/localtime:/etc/localtime:ro"
+
   sender:
     build:
       context: .
@@ -76,10 +104,30 @@ services:
     depends_on:
     - mq
     networks:
-    - mqnet
+      mqnet:
+      svcnet:
+        aliases:
+        - sender
+    ports:
+    - "8081:8080"
     volumes:
     - "${CONFIG_PATH}:/app/config.yaml:ro"
+    - "/etc/localtime:/etc/localtime:ro"
+
+  prometheus:
+    command:
+    - --config.file
+    - /etc/prometheus.yml
+    image: "prom/prometheus:v2.17.1"
+    networks:
+      svcnet:
+    ports:
+    - "9090:9090"
+    volumes:
+    - "./deploy/prometheus/prometheus.yml:/etc/prometheus.yml:ro"
+    - "/etc/localtime:/etc/localtime:ro"
 
 networks:
   dbnet:
   mqnet:
+  svcnet:

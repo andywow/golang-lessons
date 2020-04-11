@@ -156,7 +156,7 @@ func (s *EventDatabase) GetEventsForNotification(ctx context.Context, date time.
 	rs, err := s.Database.NamedQueryContext(ctx,
 		`select uuid, start_time, duration, header, description, username, notification_period from calendar.event where 
 			deleted=false and notification_period!=0 and 
-			start_time - :current_time = + notification_period * interval '1 minute'`,
+			start_time - :current_time = notification_period * interval '1 minute'`,
 		map[string]interface{}{
 			"current_time": date,
 		})

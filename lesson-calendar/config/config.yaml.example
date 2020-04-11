@@ -1,5 +1,6 @@
 # config file example
 grpc_listen: 0.0.0.0:9090
+http_listen: 0.0.0.0:8080
 log_console: true
 #log_file: calendar.log
 log_level: debug

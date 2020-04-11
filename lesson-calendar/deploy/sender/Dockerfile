@@ -17,5 +17,7 @@ WORKDIR /app
 
 COPY --from=builder /go/src/app/build/sender /app/
 
+EXPOSE 8080
+
 ENTRYPOINT ["/app/sender"]
 CMD ["--configfile", "config.yaml"]
