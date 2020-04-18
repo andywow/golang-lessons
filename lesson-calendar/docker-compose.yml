@@ -14,7 +14,7 @@ services:
     - "5432:5432"
     volumes:
     - "${POSTGRES_VOL}:/var/lib/postgresql/data"
-    - "/etc/localtime:/etc/localtime:ro"
+    - "${LOCALTIME_PATH}:/etc/localtime:ro"
 
   dbexporter:
     depends_on:
@@ -30,7 +30,7 @@ services:
     ports:
     - "9187:9187"
     volumes:
-    - "/etc/localtime:/etc/localtime:ro"
+    - "${LOCALTIME_PATH}:/etc/localtime:ro"
 
   mq:
     image: "rabbitmq:3-management"
@@ -43,7 +43,7 @@ services:
     - "15672:15672"
     volumes:
     - "${RABBITMQ_VOL}:/var/lib/rabbitmq"
-    - "/etc/localtime:/etc/localtime:ro"
+    - "${LOCALTIME_PATH}:/etc/localtime:ro"
 
   dbmigrate:
     command:
@@ -58,7 +58,7 @@ services:
     - dbnet
     volumes:
     - "./sql:/migrations"  
-    - "/etc/localtime:/etc/localtime:ro"
+    - "${LOCALTIME_PATH}:/etc/localtime:ro"
 
   apiserver:
     build:
@@ -77,7 +77,7 @@ services:
         - apiserver
     volumes:
     - "${CONFIG_PATH}:/app/config.yaml:ro"
-    - "/etc/localtime:/etc/localtime:ro"
+    - "${LOCALTIME_PATH}:/etc/localtime:ro"
 
   scheduler:
     build:
@@ -95,7 +95,7 @@ services:
         - scheduler
     volumes:
     - "${CONFIG_PATH}:/app/config.yaml:ro"
-    - "/etc/localtime:/etc/localtime:ro"
+    - "${LOCALTIME_PATH}:/etc/localtime:ro"
 
   sender:
     build:
@@ -112,7 +112,7 @@ services:
     - "8081:8080"
     volumes:
     - "${CONFIG_PATH}:/app/config.yaml:ro"
-    - "/etc/localtime:/etc/localtime:ro"
+    - "${LOCALTIME_PATH}:/etc/localtime:ro"
 
   prometheus:
     command:
@@ -125,7 +125,7 @@ services:
     - "9090:9090"
     volumes:
     - "./deploy/prometheus/prometheus.yml:/etc/prometheus.yml:ro"
-    - "/etc/localtime:/etc/localtime:ro"
+    - "${LOCALTIME_PATH}:/etc/localtime:ro"
 
 networks:
   dbnet:
